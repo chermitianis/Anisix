@@ -1,0 +1,532 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anis CH — Plateforme d'Ingénierie & Solutions Logicielles Multi-Divisions</title>
+<meta name="description" content="Plateforme d'ingénierie et d'automatisation : électricité industrielle, domotique, intégration Odoo, HMI/MES et distribution de logiciels SaaS.">
+<meta name="theme-color" content="#10263B">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<div class="crop-mark crop-mark--tl" aria-hidden="true"></div>
+<div class="crop-mark crop-mark--tr" aria-hidden="true"></div>
+<div class="crop-mark crop-mark--bl" aria-hidden="true"></div>
+<div class="crop-mark crop-mark--br" aria-hidden="true"></div>
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="#top" class="logo">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M20 6 L20 14 M20 26 L20 34 M6 20 L14 20 M26 20 L34 20" stroke="currentColor" stroke-width="2"/>
+          <circle cx="20" cy="20" r="4" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="logo-text">
+        <strong>Anis CH</strong>
+        <small data-i18n="logo_subtitle">Ingénierie · Automatisme · Logiciels</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="#hero" class="nav-link" data-i18n="nav_home">Accueil</a>
+      <a href="#divisions" class="nav-link" data-i18n="nav_divisions">Divisions</a>
+      <a href="#software" class="nav-link" data-i18n="nav_software">Logiciels & Téléchargements</a>
+      <a href="#pricing" class="nav-link" data-i18n="nav_pricing">Tarifs & Abonnements</a>
+      <a href="#services" class="nav-link" data-i18n="nav_services">Services Ingénierie</a>
+      <a href="#portfolio" class="nav-link" data-i18n="nav_portfolio">Portfolio</a>
+      <a href="#contact" class="nav-link" data-i18n="nav_contact">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button class="lang-btn is-active" data-lang="fr">FR</button>
+        <button class="lang-btn" data-lang="ar">AR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+
+      <div class="auth-guest" id="authGuestState">
+        <button class="btn btn--ghost btn--sm" data-open-auth data-i18n="auth_login">Connexion</button>
+      </div>
+
+      <div class="auth-user" id="authUserState" hidden>
+        <div class="auth-user-menu">
+          <button class="auth-user-trigger">
+            <span class="auth-avatar" aria-hidden="true">👤</span>
+          </button>
+          <div class="auth-dropdown">
+            <div class="auth-email-line" id="authUserEmail"></div>
+            <a href="admin.html" class="auth-dropdown-item" id="authAdminLink" hidden data-i18n="auth_admin_panel">Panneau d'administration</a>
+            <button class="auth-dropdown-item" id="authLogoutBtn" data-i18n="auth_logout">Déconnexion</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ========================================================= -->
+<!--   SECTION HERO COMPLÈTEMENT REPENSÉE                       -->
+<!-- ========================================================= -->
+<section class="hero" id="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      
+      <!-- شارات الثقة العلوية -->
+     
+
+      <p class="eyebrow">
+        <span class="eyebrow-dot"></span> 
+        <span data-i18n="hero_eyebrow">Disponible pour projets & intégrations SaaS</span>
+      </p>
+      
+      <h1>
+        <span data-i18n="hero_title_1">De l'Électricité Industrielle</span><br>
+        <span class="ink-highlight" data-i18n="hero_title_2">à l'Intelligence Logicielle.</span>
+      </h1>
+      
+      <p class="hero-lead" data-i18n="hero_lead">
+        Ingénierie, automatisme et distribution SaaS en un seul écosystème. 
+        <strong>Téléchargez, intégrez, industrialisez.</strong>
+      </p>
+      
+      <div class="hero-actions">
+        <a href="#software" class="btn btn--primary btn--icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z M9 9h6v6H9z M4 15h16 M9 4v5 M15 4v5"/></svg>
+          <span data-i18n="hero_cta_1">Explorer le Hub Logiciels</span>
+        </a>
+        <a href="#pricing" class="btn btn--outline" data-i18n="hero_cta_2">Voir les Plans d'Abonnement</a>
+      </div>
+
+      
+      </dl>
+    </div>
+
+    <!-- ========================================================= -->
+    <!--   NOUVEAU DIAGRAMME : "SMART INTEGRATION NODE"            -->
+    <!-- ========================================================= -->
+    <div class="hero-diagram" aria-hidden="true">
+      <svg viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- توهج ذهبي للنقاط -->
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          
+          <!-- تدرج شعاعي للخلفية -->
+          <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#CD7F3B" stop-opacity="0.15" />
+            <stop offset="100%" stop-color="#CD7F3B" stop-opacity="0" />
+          </radialGradient>
+
+          <!-- شبكة نقاط دقيقة للخلفية (تكنولوجية) -->
+          <pattern id="dotGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.2" fill="var(--line-strong)" opacity="0.25" />
+          </pattern>
+        </defs>
+
+        <!-- 1. خلفية الشبكة -->
+        <rect width="420" height="420" fill="url(#dotGrid)" />
+
+        <!-- 2. نبض التوهج المركزي (ديناميكي) -->
+        <circle cx="210" cy="210" r="90" fill="url(#coreGrad)" />
+        <circle cx="210" cy="210" r="40" fill="none" stroke="var(--copper)" stroke-width="1.5" opacity="0.6">
+          <animate attributeName="r" from="30" to="80" dur="2.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" from="0.8" to="0" dur="2.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="210" cy="210" r="20" fill="none" stroke="var(--copper)" stroke-width="1" opacity="0.4">
+          <animate attributeName="r" from="50" to="110" dur="3.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" from="0.5" to="0" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+
+        <!-- 3. الحلقات المركزية (تمثل طبقات التكامل) -->
+        <circle cx="210" cy="210" r="65" fill="none" stroke="var(--copper)" stroke-width="2.5" />
+        <circle cx="210" cy="210" r="95" fill="none" stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.7" />
+
+        <!-- 4. الخطوط المتصلة بالأنظمة (4 اتجاهات) -->
+        <!-- اتجاه 1: أعلى اليمين => SaaS / Cloud -->
+        <line x1="265" y1="165" x2="345" y2="105" stroke="var(--copper)" stroke-width="2" opacity="0.8" />
+        <circle cx="345" cy="105" r="7" fill="var(--paper)" stroke="var(--copper)" stroke-width="2.5" filter="url(#glow)" />
+        <text x="348" y="98" class="mono dim-label" font-size="9">CLOUD</text>
+
+        <!-- اتجاه 2: أسفل اليمين => PLC / Automation -->
+        <line x1="285" y1="245" x2="365" y2="305" stroke="var(--copper)" stroke-width="2" opacity="0.8" />
+        <circle cx="365" cy="305" r="7" fill="var(--paper)" stroke="var(--copper)" stroke-width="2.5" filter="url(#glow)" />
+        <text x="370" y="318" class="mono dim-label" font-size="9">PLC</text>
+
+        <!-- اتجاه 3: أعلى اليسار => Odoo / ERP -->
+        <line x1="155" y1="165" x2="75" y2="105" stroke="var(--copper)" stroke-width="2" opacity="0.8" />
+        <circle cx="75" cy="105" r="7" fill="var(--paper)" stroke="var(--copper)" stroke-width="2.5" filter="url(#glow)" />
+        <text x="20" y="98" class="mono dim-label" font-size="9">ODOO</text>
+
+        <!-- اتجاه 4: أسفل اليسار => HMI / SCADA -->
+        <line x1="135" y1="245" x2="55" y2="305" stroke="var(--copper)" stroke-width="2" opacity="0.8" />
+        <circle cx="55" cy="305" r="7" fill="var(--paper)" stroke="var(--copper)" stroke-width="2.5" filter="url(#glow)" />
+        <text x="8" y="318" class="mono dim-label" font-size="9">HMI</text>
+
+        <!-- 5. أيقونة المركز (المنصة الذكية) -->
+        <!-- خلفية سداسية الشكل للمنصة -->
+        <polygon points="210,180 240,198 240,234 210,252 180,234 180,198" fill="var(--ink)" stroke="var(--copper)" stroke-width="2.5" />
+        <!-- رمز التكنولوجيا (ناقل بيانات) -->
+        <text x="210" y="222" class="mono" font-size="16" fill="var(--copper)" text-anchor="middle" dominant-baseline="middle" font-weight="700">⚡</text>
+        
+        <!-- نقاط ربط صغيرة على الحلقة الداخلية (بيانات) -->
+        <circle cx="210" cy="145" r="4" fill="var(--copper)" />
+        <circle cx="275" cy="210" r="4" fill="var(--copper)" />
+        <circle cx="210" cy="275" r="4" fill="var(--copper)" />
+        <circle cx="145" cy="210" r="4" fill="var(--copper)" />
+
+        <!-- تسميات توضيحية جانبية -->
+        <text x="210" y="340" class="mono dim-label" font-size="11" text-anchor="middle" opacity="0.9">ÉCOSYSTÈME INTÉGRÉ</text>
+        <text x="210" y="355" class="mono dim-label" font-size="9" text-anchor="middle" opacity="0.6">ODoo · MES · SCADA · IA</text>
+      </svg>
+    </div>
+  </div>
+  <div class="dimension-divider" aria-hidden="true"><span></span><span></span><span></span></div>
+</section>
+
+<!-- ========================================================= -->
+<!--   RESTE DU SITE (Divisions, Software, etc.)               -->
+<!-- ========================================================= -->
+
+<section class="section" id="divisions">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">ECOSYSTEM DIVISIONS</p>
+      <h2 data-i18n="divisions_title">Divisions & Pôles d'Expertise</h2>
+      <p class="section-lead" data-i18n="divisions_lead">Solutions technologiques et logicielles organisées par secteur d'activité.</p>
+    </header>
+
+    <div class="services-grid">
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 01</span>
+        <h3 data-i18n="div1_title">⚡ Électricité Industrielle & Bâtiment</h3>
+        <p data-i18n="div1_desc">Schémas électriques CAD, calculs de bilan de puissance, réseaux triphasés et protection industrielle.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 02</span>
+        <h3 data-i18n="div2_title">🏭 Informatique Industrielle & Automatisme</h3>
+        <p data-i18n="div2_desc">Programmation PLC, interfaces HMI, supervision SCADA et suivi d'atelier de production (MES).</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 03</span>
+        <h3 data-i18n="div3_title">🔄 Intégration Odoo & Connecteurs APPs</h3>
+        <p data-i18n="div3_desc">Connecteurs et modules Odoo personnalisés synchronisés avec les équipements de production et machines CNC.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 04</span>
+        <h3 data-i18n="div4_title">🏠 Bâtiment Intelligent & Domotique (Smart Home)</h3>
+        <p data-i18n="div4_desc">Protocoles KNX, configuration de caméras Yoosee, gestion d'énergie et automatisation des accès.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 05</span>
+        <h3 data-i18n="div5_title">💻 Applications Bureau & Mobile</h3>
+        <p data-i18n="div5_desc">Logiciels Windows/Linux et applications Android prêts au téléchargement avec licences d'activation automatisées.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">DIV 06</span>
+        <h3 data-i18n="div6_title">🕹️ Simulation Interactive & Gaming</h3>
+        <p data-i18n="div6_desc">Simulateurs 3D interactifs de lignes de production et environnements virtuels d'apprentissage technique.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" id="software">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">SOFTWARE & DOWNLOADS HUB</p>
+      <h2 data-i18n="software_title">Hub de Distribution des Logiciels</h2>
+      <p class="section-lead" data-i18n="software_lead">Applications Android, logiciels PC, modules Odoo, plateformes Web et simulateurs.</p>
+    </header>
+
+    <div class="filter-tabs" id="filterTabs" role="tablist" aria-label="Filtres logiciels">
+      <button type="button" class="filter-tab is-active" data-filter="all" role="tab" aria-selected="true" data-i18n="filter_all">Tous</button>
+      <button type="button" class="filter-tab" data-filter="android" role="tab" aria-selected="false" data-i18n="filter_android">Apps Android</button>
+      <button type="button" class="filter-tab" data-filter="desktop" role="tab" aria-selected="false" data-i18n="filter_desktop">Logiciels PC</button>
+      <button type="button" class="filter-tab" data-filter="industrial" role="tab" aria-selected="false">Industriel / CNC</button>
+      <button type="button" class="filter-tab" data-filter="saas" role="tab" aria-selected="false" data-i18n="filter_saas">Plateformes SaaS</button>
+      <button type="button" class="filter-tab" data-filter="game" role="tab" aria-selected="false" data-i18n="filter_game">Jeux & Simulation</button>
+    </div>
+
+    <div class="software-grid" id="softwareGrid">
+      <p class="loading-state" data-i18n="loading_items">Chargement en cours...</p>
+    </div>
+    <p class="empty-state" id="emptyState" hidden data-i18n="empty_state">Aucun élément disponible pour le moment.</p>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">MONETIZATION & LICENSES</p>
+      <h2 data-i18n="pricing_title">Plans d'Abonnement & Licences</h2>
+      <p class="section-lead" data-i18n="pricing_lead">Choisissez le plan adapté pour télécharger des applications, obtenir des clés de licence et bénéficier des services d'intégration.</p>
+    </header>
+
+    <div class="services-grid">
+      <article class="service-card reveal" style="border: 1px solid var(--line);">
+        <span class="service-index mono">PLAN 01</span>
+        <h3>Plan Gratuit (Free Pass)</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">0 € / Gratuit</p>
+        <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
+          <li>✓ Téléchargement des logiciels et outils gratuits</li>
+          <li>✓ Consultation du portfolio et schémas basiques</li>
+          <li>✓ Support communautaire via WhatsApp</li>
+          <li style="opacity: 0.5;">✗ Pas de clé de licence pour les apps Pro</li>
+        </ul>
+        <button class="btn btn--outline btn--block" data-open-auth data-i18n="plan_free_btn">Commencer Gratuitement</button>
+      </article>
+
+      <article class="service-card reveal" style="border: 2px solid var(--copper); background: rgba(205, 127, 59, 0.04); position: relative;">
+        <span class="service-index mono" style="color: var(--copper);">PLAN 02 ★ POPULAIRE</span>
+        <div style="position: absolute; top: -1px; right: -1px; background: var(--copper); color: white; padding: 4px 16px; font-size: 0.65rem; font-weight: 700; border-radius: 0 var(--radius-md) 0 var(--radius-md); text-transform: uppercase; letter-spacing: 0.06em;">Recommandé</div>
+        <h3>Abonnement Pro (Pro Suite)</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">19 € <small style="font-size:0.9rem; font-weight:400;">/ mois</small></p>
+        <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
+          <li>✓ Accès illimité à toutes les applications PC & Android</li>
+          <li>✓ Génération automatique de clés de licence (License Keys)</li>
+          <li>✓ Accès aux modules et connecteurs d'intégration Odoo</li>
+          <li>✓ Mises à jour continues et support prioritaire</li>
+        </ul>
+        <button class="btn btn--primary btn--block" data-open-auth data-i18n="plan_pro_btn">S'abonner à Pro Suite</button>
+      </article>
+
+      <article class="service-card reveal" style="border: 1px solid var(--line);">
+        <span class="service-index mono">PLAN 03</span>
+        <h3>Plan Entreprise & Usines</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">Sur Mesure</p>
+        <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
+          <li>✓ Développement de connecteurs spécifiques Odoo / MES</li>
+          <li>✓ Conception d'interfaces HMI & schémas électriques dédiés</li>
+          <li>✓ Déploiement sur site & assistance 24/7</li>
+          <li>✓ Licences illimitées pour le personnel de l'entreprise</li>
+        </ul>
+        <a href="#contact" class="btn btn--outline btn--block" data-i18n="plan_ent_btn">Demander un Devis</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" id="services">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">ENGINEERING SERVICES</p>
+      <h2 data-i18n="services_title">Services d'Ingénierie & Conseils</h2>
+      <p class="section-lead" data-i18n="services_lead">Solutions techniques de terrain et développements personnalisés.</p>
+    </header>
+
+    <div class="services-grid">
+      <article class="service-card reveal">
+        <span class="service-index mono">01</span>
+        <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg></div>
+        <h3 data-i18n="service1_title">Électricité & Domotique</h3>
+        <p data-i18n="service1_desc">Conception et réalisation de réseaux électriques bâtiment et industriels.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">02</span>
+        <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.2 6.8 3.4L12 11l-6.8-3.4L12 4.2zM4 9.3l7 3.5v7.9l-7-3.5V9.3zm9 11.4v-7.9l7-3.5v7.9l-7 3.5z"/></svg></div>
+        <h3 data-i18n="service2_title">Automatisme & Schématique CAD</h3>
+        <p data-i18n="service2_desc">Conception de plans électriques aux normes CAD et programmation d'automates PLC.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">03</span>
+        <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3zm0 10.5 4-4-1.4-1.4L12 9.7 9.4 7.1 8 8.5l4 4z"/></svg></div>
+        <h3 data-i18n="service3_title">Sécurité & Vidéosurveillance</h3>
+        <p data-i18n="service3_desc">Installation de systèmes de surveillance Yoosee, alarmes et régulateurs de puissance.</p>
+      </article>
+      <article class="service-card reveal">
+        <span class="service-index mono">04</span>
+        <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6z"/></svg></div>
+        <h3 data-i18n="service4_title">Développement sur Mesure & Odoo</h3>
+        <p data-i18n="service4_desc">Création de plateformes et intégration de logiciels personnalisés pour ateliers et usines.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="portfolio">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">SHOWCASE & PROJETS</p>
+      <h2 data-i18n="portfolio_title">Portfolio & Réalisations</h2>
+      <p class="section-lead" data-i18n="portfolio_lead">Aperçu de nos projets en automatisation, intégration Odoo et électricité.</p>
+    </header>
+
+    <div class="portfolio-grid" id="portfolioGrid">
+      <p class="loading-state" data-i18n="loading_items">Chargement en cours...</p>
+    </div>
+    <p class="empty-state" id="portfolioEmptyState" hidden data-i18n="empty_state">Aucun projet trouvé.</p>
+  </div>
+</section>
+
+<section class="section section--alt" id="contact">
+  <div class="container">
+    <header class="section-head">
+      <p class="section-kicker">GET IN TOUCH</p>
+      <h2 data-i18n="contact_title">Contactez-moi</h2>
+      <p class="section-lead" data-i18n="contact_lead">Décrivez brièvement votre projet ou votre besoin en abonnement.</p>
+    </header>
+
+    <div class="contact-grid">
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="form-row">
+          <label for="name" data-i18n="form_name">Nom complet</label>
+          <input type="text" id="name" name="name" required placeholder="Votre nom complet">
+        </div>
+        <div class="form-row">
+          <label for="contactInfo" data-i18n="form_contact">E-mail ou Téléphone</label>
+          <input type="text" id="contactInfo" name="contactInfo" required placeholder="exemple@mail.com ou +216 00 000 000">
+        </div>
+        <div class="form-row">
+          <label for="serviceType" data-i18n="form_service">Type de Service / Abonnement</label>
+          <select id="serviceType" name="serviceType" required>
+            <option value="" disabled selected>Sélectionnez une option</option>
+            <option value="subscription">Abonnement Pro Suite / Licences Apps</option>
+            <option value="odoo">Intégration Odoo & Logiciels d'Usine</option>
+            <option value="android">Application Android sur Mesure</option>
+            <option value="desktop">Logiciel PC sur Mesure</option>
+            <option value="electrical">Étude Électrique / Automatisme</option>
+            <option value="website">Plateforme Web Dédiée</option>
+            <option value="other">Autre demande</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="details" data-i18n="form_details">Détails de la demande</label>
+          <textarea id="details" name="details" rows="4" required placeholder="Décrivez votre projet en quelques lignes..."></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block" data-i18n="form_submit">Envoyer la demande</button>
+        <p class="form-note" id="formNote" role="status"></p>
+      </form>
+
+      <aside class="contact-side">
+        <a href="#" id="whatsappLink" class="contact-link contact-link--whatsapp" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.36c1.36.72 2.9 1.13 4.55 1.13h.05c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2zM17.4 15.4c-.23.65-1.34 1.25-1.85 1.31-.47.06-1.03.08-1.66-.1a13.6 13.6 0 0 1-1.5-.53c-2.64-1.13-4.36-3.75-4.5-3.93-.13-.18-1.08-1.43-1.08-2.73 0-1.3.68-1.94.92-2.2.24-.27.53-.33.7-.33h.5c.16 0 .38-.03.58.45.23.55.77 1.9.84 2.04.07.14.11.3.02.48-.1.18-.14.29-.27.44-.14.16-.29.36-.42.48-.14.13-.28.28-.12.55.16.28.7 1.16 1.51 1.88 1.04.93 1.92 1.22 2.19 1.36.28.14.44.12.6-.07.16-.19.68-.8.87-1.07.18-.28.36-.23.6-.14.24.09 1.5.71 1.76.84.26.13.44.19.5.3.06.12.06.65-.16 1.3z"/></svg>
+          <span data-i18n="contact_whatsapp">Contacter via WhatsApp</span>
+        </a>
+        <a href="#" id="githubLink" class="contact-link" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.71c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.34 1.12 2.91.86.09-.66.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="#" id="linkedinLink" class="contact-link" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.11 20.45H3.56V9h3.55v11.45z"/></svg>
+          <span>LinkedIn</span>
+        </a>
+
+        <div class="mini-titleblock">
+          <div class="tb-row"><span data-i18n="contact_response_time">Temps de réponse habituel</span><strong data-i18n="contact_response_value">Sous quelques heures</strong></div>
+          <div class="tb-row"><span data-i18n="contact_scope">Périmètre de service</span><strong data-i18n="contact_scope_value">À distance + Sur site</strong></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="titleblock">
+      <div class="tb-cell tb-cell--wide">
+        <span class="tb-label" data-i18n="footer_project">Projet</span>
+        <strong data-i18n="footer_project_value">Plateforme d'Ingénierie Tech — Anis CH</strong>
+      </div>
+      <div class="tb-cell">
+        <span class="tb-label" data-i18n="footer_version">Version</span>
+        <strong class="mono">3.0 PRO</strong>
+      </div>
+      <div class="tb-cell">
+        <span class="tb-label" data-i18n="footer_date">Date</span>
+        <strong class="mono" id="footerDate"></strong>
+      </div>
+      <div class="tb-cell">
+        <span class="tb-label" data-i18n="footer_status">Statut</span>
+        <strong data-i18n="footer_status_value">En Production Live</strong>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p><span data-i18n="footer_rights">Tous droits réservés</span> © <span id="footerYear"></span> Anis CH</p>
+      <div class="footer-links"><a href="#hero" data-i18n="footer_top">Haut de page ↑</a></div>
+    </div>
+  </div>
+</footer>
+
+<button class="scroll-top" id="scrollTop" aria-label="Retour en haut">↑</button>
+
+<div class="modal" id="authModal" hidden>
+  <div class="modal-backdrop" id="authModalBackdrop"></div>
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" id="authModalClose" aria-label="Fermer">×</button>
+    <h3 id="authModalTitle" data-i18n="auth_login_title">Connexion à la Plateforme</h3>
+
+    <ul class="auth-perks">
+      <li>✓ Téléchargement des logiciels et connecteurs</li>
+      <li>✓ Obtention des clés de licences (Abonnés Pro)</li>
+      <li>✓ Suivi des abonnements et support technique</li>
+    </ul>
+
+    <form id="authForm" novalidate>
+      <div class="form-row">
+        <label for="authEmail" data-i18n="auth_email">Adresse E-mail</label>
+        <input type="email" id="authEmail" name="email" required autocomplete="email" placeholder="vous@exemple.com">
+      </div>
+      <div class="form-row">
+        <label for="authPassword" data-i18n="auth_password">Mot de passe</label>
+        <input type="password" id="authPassword" name="password" required minlength="6" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <div class="form-row" id="authConfirmRow" hidden>
+        <label for="authConfirmPassword" data-i18n="auth_confirm">Confirmer le mot de passe</label>
+        <input type="password" id="authConfirmPassword" name="confirmPassword" minlength="6" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <p class="auth-error" id="authError"></p>
+      <button type="submit" class="btn btn--primary btn--block" id="authSubmitBtn" data-i18n="auth_login_btn">Se connecter</button>
+    </form>
+
+    <div class="auth-switch-row">
+      <button type="button" id="authSwitchBtn" data-i18n="auth_switch_signup">Pas encore de compte ? S'inscrire</button>
+    </div>
+    <div class="auth-divider"><span data-i18n="auth_or_browse">ou</span></div>
+    <button type="button" class="btn btn--ghost btn--block" id="authGuestBtn" data-i18n="auth_continue_guest">Continuer en tant que visiteur</button>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('whatsappLink').href = `https://wa.me/${window.APP_CONFIG.WHATSAPP_NUMBER}`;
+    document.getElementById('githubLink').href = window.APP_CONFIG.GITHUB_URL;
+    document.getElementById('linkedinLink').href = window.APP_CONFIG.LINKEDIN_URL;
+    document.getElementById('authGuestBtn').addEventListener('click', () => document.getElementById('authModalClose').click());
+  });
+</script>
+</body>
+</html>

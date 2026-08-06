@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panneau d'Administration — Ing. Anis</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<header class="admin-header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="30" height="30">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M20 6 L20 14 M20 26 L20 34 M6 20 L14 20 M26 20 L34 20" stroke="currentColor" stroke-width="2"/>
+          <circle cx="20" cy="20" r="4" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="logo-text">
+        <strong>Panneau de Contrôle</strong>
+        <small>Gestion des logiciels et projets</small>
+      </span>
+    </a>
+    <div class="header-actions">
+      <div class="lang-switch" aria-label="Sélection de la langue">
+        <button type="button" class="lang-btn is-active" data-lang-btn="fr">FR</button>
+        <button type="button" class="lang-btn" data-lang-btn="ar">العربية</button>
+        <button type="button" class="lang-btn" data-lang-btn="en">EN</button>
+      </div>
+      <a href="index.html" class="btn btn--ghost btn--sm">← Retour au site</a>
+    </div>
+  </div>
+</header>
+
+<div id="adminGuard" class="admin-guard container">Vérification des autorisations administrateur...</div>
+
+<main id="adminPanel" class="admin-shell container" hidden>
+  <div class="admin-grid">
+
+    <section class="admin-card">
+      <h2>➕ Ajouter un Logiciel / Application</h2>
+
+      <div class="mode-switch">
+        <label><input type="radio" name="uploadMode" value="file" checked> Fichier local (APK, EXE, ZIP, MP4...)</label>
+        <label><input type="radio" name="uploadMode" value="link"> Lien externe uniquement (Plateforme SaaS)</label>
+      </div>
+
+      <form id="uploadForm">
+
+        <div id="fileModeBox">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="30" height="30" style="margin-inline:auto"><path fill="currentColor" d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </div>
+            <p><strong>Glissez le fichier ici</strong> ou cliquez pour parcourir</p>
+            <small>Tous formats acceptés (APK, EXE, ZIP, MP4, PDF...)</small>
+          </div>
+          <input type="file" id="fileInput" hidden>
+          <p class="file-name-label" id="fileNameLabel"></p>
+        </div>
+
+        <div id="linkModeBox" hidden>
+          <div class="form-row">
+            <label for="externalUrlLinkMode">URL de la plateforme / Application</label>
+            <input type="url" id="externalUrlLinkMode" placeholder="https://exemple.com">
+          </div>
+        </div>
+
+        <fieldset class="lang-field-group">
+          <legend>Nom du logiciel (Français obligatoire)</legend>
+          <div class="form-row"><label>Nom — Français *</label><input type="text" name="nameFr" required placeholder="ex: Générateur HMI CNC"></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>Nom — العربية</label><input type="text" name="nameAr" dir="rtl" placeholder="مولد واجهات التحكم العددي"></div>
+            <div class="form-row"><label>Nom — English</label><input type="text" name="nameEn" placeholder="CNC HMI Generator"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="lang-field-group">
+          <legend>Description (Français obligatoire)</legend>
+          <div class="form-row"><label>Description — Français *</label><textarea name="descFr" rows="2" required placeholder="Description détaillée du logiciel..."></textarea></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>Description — العربية</label><textarea name="descAr" rows="2" dir="rtl" placeholder="وصف تفصيلي للبرنامج..."></textarea></div>
+            <div class="form-row"><label>Description — English</label><textarea name="descEn" rows="2" placeholder="Detailed software description..."></textarea></div>
+          </div>
+        </fieldset>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label>Catégorie *</label>
+            <select name="category" required>
+              <option value="desktop">Logiciel PC (Desktop)</option>
+              <option value="industrial">Industriel / CNC / Automatisme</option>
+              <option value="android">Application Android</option>
+              <option value="saas">Plateforme SaaS / Web</option>
+              <option value="game">Jeu / Simulation</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Badge / Plateforme</label>
+            <input type="text" name="badgeLabel" placeholder="ex: Windows / CNC / Web App">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row"><label>Version</label><input type="text" name="version" placeholder="v1.0.0"></div>
+          <div class="form-row"><label>Info Métadonnées</label><input type="text" name="metaText" placeholder="ex: 45 MB | Win 10/11"></div>
+        </div>
+
+        <div class="form-row">
+          <label>Lien externe supplémentaire (Optionnel - Dépôt GitHub, Demo...)</label>
+          <input type="url" name="externalUrl" placeholder="https://github.com/...">
+        </div>
+
+        <progress class="upload-progress" id="uploadProgress" value="0" max="100" hidden></progress>
+        <p class="upload-status" id="uploadStatus"></p>
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top:14px">Publier le logiciel</button>
+      </form>
+    </section>
+
+    <section class="admin-card">
+      <h2>📦 Logiciels Publiés</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Catégorie</th>
+            <th>Version</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminItemsBody">
+          <tr><td colspan="5">Chargement en cours...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <div class="admin-grid" style="margin-top:32px">
+
+    <section class="admin-card">
+      <h2>🖼️ Ajouter un Projet au Portfolio</h2>
+      <form id="portfolioForm">
+        
+        <div class="dropzone" id="portfolioDropzone">
+          <div class="dropzone-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="30" height="30" style="margin-inline:auto"><path fill="currentColor" d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          </div>
+          <p><strong>Glissez une image ou vidéo ici</strong> ou cliquez pour parcourir</p>
+          <small>JPG, PNG, WEBP, MP4 — jusqu'à 50 Mo</small>
+        </div>
+        <input type="file" id="portfolioFileInput" accept="image/*,video/*" hidden>
+        <p class="file-name-label" id="portfolioFileNameLabel"></p>
+
+        <fieldset class="lang-field-group">
+          <legend>Titre du projet (Français obligatoire)</legend>
+          <div class="form-row"><label>Titre — Français *</label><input type="text" name="titleFr" required placeholder="ex: Armoire Électrique CNC"></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>Titre — العربية</label><input type="text" name="titleAr" dir="rtl" placeholder="مخطط لوحة تحكم كهربائية"></div>
+            <div class="form-row"><label>Titre — English</label><input type="text" name="titleEn" placeholder="CNC Control Cabinet Schematic"></div>
+          </div>
+        </fieldset>
+
+        <div class="form-row">
+          <label>Catégorie de projet *</label>
+          <select name="category" required>
+            <option value="electrical">Schéma Électrique / Industrial</option>
+            <option value="domotique">Domotique / KNX</option>
+            <option value="cnc">Fraisage / CNC Machine</option>
+            <option value="app">Application Mobile</option>
+            <option value="web">Projet Web / SaaS</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+
+        <progress class="upload-progress" id="portfolioProgress" value="0" max="100" hidden></progress>
+        <p class="upload-status" id="portfolioStatus"></p>
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top:14px">Publier le projet</button>
+      </form>
+    </section>
+
+    <section class="admin-card">
+      <h2>🗂️ Projets Portfolio Publiés</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Catégorie</th>
+            <th>Type Médias</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="portfolioItemsBody">
+          <tr><td colspan="4">Chargement en cours...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  // Maintien de la synchronisation dynamique des champs
+  document.addEventListener('DOMContentLoaded', () => {
+    const linkModeInput = document.getElementById('externalUrlLinkMode');
+    const form = document.getElementById('uploadForm');
+    
+    if (linkModeInput && form) {
+      linkModeInput.addEventListener('input', () => {
+        if (form.elements['externalUrl']) {
+          form.elements['externalUrl'].value = linkModeInput.value;
+        }
+      });
+    }
+  });
+</script>
+<script src="js/admin.js"></script>
+</body>
+</html>
