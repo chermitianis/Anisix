@@ -1,0 +1,34 @@
+# =========================================================
+# Ing. Anis — Configuration des Robots d'Exploration (SEO & Sécurité)
+# Site: https://anisix-dev.vercel.app
+# =========================================================
+
+User-agent: *
+
+# ---------- Autorisations (Allow) ----------
+Allow: /
+Allow: /index.html
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+
+# ---------- Restrictions de Sécurité & Administration (Disallow) ----------
+# Interdiction d'accéder au panneau d'administration
+Disallow: /admin.html
+Disallow: /admin/
+Disallow: /dashboard/
+
+# Interdiction d'indexer les API et scripts internes sensibles
+Disallow: /api/
+Disallow: /config/
+Disallow: /js/config.js
+
+# Interdiction des fichiers système et temporaires
+Disallow: /*.json$
+Disallow: /*.sql$
+Disallow: /*.md$
+Disallow: /.git/
+Disallow: /.env
+
+# ---------- Indication du Sitemap Officiel ----------
+Sitemap: https://anisix-dev.vercel.app/sitemap.xml

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — م. أنيس</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<header class="admin-header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="30" height="30"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 6 L20 14 M20 26 L20 34 M6 20 L14 20 M26 20 L34 20" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="4" fill="currentColor"/></svg>
+      </span>
+      <span class="logo-text"><strong>لوحة التحكم</strong><small>إدارة البرمجيات والتطبيقات</small></span>
+    </a>
+    <a href="index.html" class="btn btn--ghost btn--sm">→ العودة للموقع</a>
+  </div>
+</header>
+
+<div id="adminGuard" class="admin-guard container">جارٍ التحقق من الصلاحية...</div>
+
+<main id="adminPanel" class="admin-shell container" hidden>
+  <div class="admin-grid">
+
+    <!-- ---------- نموذج إضافة عنصر جديد ---------- -->
+    <section class="admin-card">
+      <h2>➕ إضافة برنامج / تطبيق جديد</h2>
+
+      <div class="mode-switch">
+        <label><input type="radio" name="uploadMode" value="file" checked> رفع ملف (APK / EXE / ZIP / MP4...)</label>
+        <label><input type="radio" name="uploadMode" value="link"> رابط خارجي فقط (منصة أونلاين)</label>
+      </div>
+
+      <form id="uploadForm">
+
+        <div id="fileModeBox">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="30" height="30" style="margin-inline:auto"><path fill="currentColor" d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </div>
+            <p><strong>اسحب الملف هنا</strong> أو انقر للاختيار</p>
+            <small>أي نوع ملف — بلا حد للامتداد (APK, EXE, ZIP, MP4, PDF, TXT...)</small>
+          </div>
+          <input type="file" id="fileInput" hidden>
+          <p class="file-name-label" id="fileNameLabel"></p>
+        </div>
+
+        <div id="linkModeBox" hidden>
+          <div class="form-row">
+            <label for="externalUrlLinkMode">رابط المنصة / التطبيق</label>
+            <input type="url" id="externalUrlLinkMode" placeholder="https://...">
+          </div>
+        </div>
+
+        <fieldset class="lang-field-group">
+          <legend>الاسم (بالعربي إجباري، البقية اختياري)</legend>
+          <div class="form-row"><label>الاسم — عربي *</label><input type="text" name="nameAr" required></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>الاسم — Français</label><input type="text" name="nameFr"></div>
+            <div class="form-row"><label>الاسم — English</label><input type="text" name="nameEn"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="lang-field-group">
+          <legend>الوصف (بالعربي إجباري، البقية اختياري)</legend>
+          <div class="form-row"><label>الوصف — عربي *</label><textarea name="descAr" rows="2" required></textarea></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>الوصف — Français</label><textarea name="descFr" rows="2"></textarea></div>
+            <div class="form-row"><label>الوصف — English</label><textarea name="descEn" rows="2"></textarea></div>
+          </div>
+        </fieldset>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label>التصنيف *</label>
+            <select name="category" required>
+              <option value="android">تطبيق أندرويد</option>
+              <option value="desktop">برنامج حاسوب</option>
+              <option value="saas">منصة أونلاين</option>
+              <option value="game">لعبة</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>وسم/منصة (Badge)</label>
+            <input type="text" name="badgeLabel" placeholder="مثال: Android / Windows / Web App">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row"><label>رقم الإصدار</label><input type="text" name="version" placeholder="1.0.0"></div>
+          <div class="form-row"><label>معلومة إضافية</label><input type="text" name="metaText" placeholder="18 MB أو Windows 10/11"></div>
+        </div>
+
+        <div class="form-row">
+          <label>رابط خارجي إضافي (اختياري — مثال: Play Store أو لقطات شاشة)</label>
+          <input type="url" name="externalUrl" placeholder="https://...">
+        </div>
+
+        <progress class="upload-progress" id="uploadProgress" value="0" max="100" hidden></progress>
+        <p class="upload-status" id="uploadStatus"></p>
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top:14px">رفع ونشر العنصر</button>
+      </form>
+    </section>
+
+    <!-- ---------- قائمة العناصر الحالية ---------- -->
+    <section class="admin-card">
+      <h2>📦 العناصر المنشورة حاليًا</h2>
+      <table class="admin-table">
+        <thead>
+          <tr><th>الاسم</th><th>التصنيف</th><th>الإصدار</th><th>النوع</th><th></th></tr>
+        </thead>
+        <tbody id="adminItemsBody">
+          <tr><td colspan="5">جارٍ التحميل...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <div class="admin-grid" style="margin-top:32px">
+
+    <!-- ---------- نموذج إضافة عمل جديد للمعرض ---------- -->
+    <section class="admin-card">
+      <h2>🖼️ إضافة عمل جديد للمعرض</h2>
+      <form id="portfolioForm">
+        <div class="dropzone" id="portfolioDropzone">
+          <div class="dropzone-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="30" height="30" style="margin-inline:auto"><path fill="currentColor" d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          </div>
+          <p><strong>اسحب صورة أو فيديو هنا</strong> أو انقر للاختيار</p>
+          <small>JPG, PNG, WEBP, MP4 — حتى 50 ميغا</small>
+        </div>
+        <input type="file" id="portfolioFileInput" accept="image/*,video/*" hidden>
+        <p class="file-name-label" id="portfolioFileNameLabel"></p>
+
+        <fieldset class="lang-field-group">
+          <legend>العنوان (بالعربي إجباري، البقية اختياري)</legend>
+          <div class="form-row"><label>العنوان — عربي *</label><input type="text" name="titleAr" required></div>
+          <div class="form-grid-2">
+            <div class="form-row"><label>العنوان — Français</label><input type="text" name="titleFr"></div>
+            <div class="form-row"><label>العنوان — English</label><input type="text" name="titleEn"></div>
+          </div>
+        </fieldset>
+
+        <div class="form-row">
+          <label>التصنيف *</label>
+          <select name="category" required>
+            <option value="electrical">مخطط كهربائي</option>
+            <option value="domotique">دوموتيك</option>
+            <option value="app">تطبيق</option>
+            <option value="web">موقع ويب</option>
+            <option value="other">أخرى</option>
+          </select>
+        </div>
+
+        <progress class="upload-progress" id="portfolioProgress" value="0" max="100" hidden></progress>
+        <p class="upload-status" id="portfolioStatus"></p>
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top:14px">رفع ونشر العمل</button>
+      </form>
+    </section>
+
+    <!-- ---------- قائمة أعمال المعرض الحالية ---------- -->
+    <section class="admin-card">
+      <h2>🗂️ أعمال المعرض المنشورة</h2>
+      <table class="admin-table">
+        <thead><tr><th>العنوان</th><th>التصنيف</th><th>النوع</th><th></th></tr></thead>
+        <tbody id="portfolioItemsBody"><tr><td colspan="4">جارٍ التحميل...</td></tr></tbody>
+      </table>
+    </section>
+
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  // مزامنة حقل الرابط في وضع "رابط خارجي فقط" مع الحقل المخفي (تم نقله إلى admin.js)
+  document.addEventListener('DOMContentLoaded', () => {
+    const linkModeInput = document.getElementById('externalUrlLinkMode');
+    const form = document.getElementById('uploadForm');
+    // نربط التغيير في حقل الرابط بحقل externalUrl الأساسي
+    if (linkModeInput) {
+      linkModeInput.addEventListener('input', () => {
+        form.elements['externalUrl'].value = linkModeInput.value;
+      });
+    }
+  });
+</script>
+<script src="js/admin.js"></script>
+</body>
+</html>
