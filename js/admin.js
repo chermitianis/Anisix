@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return div.innerHTML;
   }
 
-  // ====== تعريف loadItems و loadPortfolioItems قبل checkAccess ======
+  // ====== تعريف loadItems و loadPortfolioItems ======
 
   async function loadItems() {
     if (!listBody) return;
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ====== التحقق من الصلاحية ======
+  // ====== التحقق من الصلاحية (checkAccess) ======
 
   async function checkAccess() {
     console.log('🔍 Vérification des accès...');
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return false;
     }
 
-    // إصلاح الخطأ: فحص ما إذا كان isAdmin دالة أم خاصية
+    // الفحص الآمن لـ isAdmin سواء كان Getter أو Function
     const isAdminUser = typeof window.Auth.isAdmin === 'function' 
       ? await window.Auth.isAdmin() 
       : window.Auth.isAdmin;
@@ -181,7 +181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setGuardState('ok');
     
-    // تحميل البيانات بعد التأكد من الصلاحية
     try {
       await loadItems();
       await loadPortfolioItems();
@@ -254,14 +253,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ====== التهيئة ======
+  // ====== التهيئة للانتظار والبدء ======
 
   if (typeof window.isSupabaseConfigured === 'function' && !window.isSupabaseConfigured()) {
     setGuardState('denied', '⚠️ الموقع غير مربوط بقاعدة البيانات. عدّل js/config.js أولاً.');
     return;
   }
 
-  // وظيفة للانتظار حتى تحميل Auth
   async function waitForAuth(retries = 0) {
     const maxRetries = 15;
     
@@ -271,15 +269,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.Auth.init();
         await checkAccess();
         
-        // ربط الأحداث بعد التهيئة الناجحة
         document.addEventListener('auth:changed', () => {
           console.log('🔄 Auth changé, re-vérification...');
           checkAccess();
         });
         
-        // ====== إعداد باقي ميزات لوحة التحكم ======
         setupAdminFeatures();
-        
         console.log('✅ Admin initialisé avec succès!');
       } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation de Auth:', err);
@@ -298,11 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => waitForAuth(retries), 400);
   }
 
-  // ====== إعداد ميزات لوحة التحكم ======
+  // ====== إعداد ميزات عناصر التحكم والرفع ======
+
   function setupAdminFeatures() {
     console.log('⚙️ Configuration des fonctionnalités admin...');
 
-    // ====== تبديل وضع الرفع ======
     uploadModeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
         const isFile = document.querySelector('input[name="uploadMode"]:checked').value === 'file';
@@ -320,7 +315,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
 
-    // ====== منطقة السحب والإفلات للملفات ======
     if (dropzone) {
       ['dragenter', 'dragover'].forEach(evt =>
         dropzone.addEventListener(evt, (e) => {
@@ -370,7 +364,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (fileNameLabel) fileNameLabel.textContent = `${file.name} — ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
     }
 
-    // ====== إرسال نموذج الإضافة ======
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -399,7 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!payload.name_ar || !payload.description_ar || !payload.category) {
           if (statusBox) {
-            statusBox.textContent = '⚠️ الحقول الأساسية (الاسم بالعربي، الوصف، التصنيف) مطلوبة.';
+            statusBox.textContent = '⚠️ الحقول الأساسية مطلوبة.';
             statusBox.classList.add('is-error');
           }
           return;
@@ -407,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (uploadMode === 'file' && !selectedFile) {
           if (statusBox) {
-            statusBox.textContent = '⚠️ الرجاء اختيار ملف للرفع، أو التبديل لوضع "رابط خارجي فقط".';
+            statusBox.textContent = '⚠️ الرجاء اختيار ملف للرفع.';
             statusBox.classList.add('is-error');
           }
           return;
@@ -446,7 +439,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (insertError) throw insertError;
 
           if (statusBox) {
-            statusBox.textContent = '✅ تمت الإضافة بنجاح — العنصر ظاهر الآن في الموقع.';
+            statusBox.textContent = '✅ تمت الإضافة بنجاح.';
             statusBox.classList.remove('is-error');
             statusBox.classList.add('is-success');
           }
@@ -477,7 +470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // ====== معرض الأعمال (portfolio) ======
+    // ====== معرض الأعمال ======
     const portfolioForm = document.getElementById('portfolioForm');
     const portfolioDropzone = document.getElementById('portfolioDropzone');
     const portfolioFileInput = document.getElementById('portfolioFileInput');
@@ -626,6 +619,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ====== بدء التهيئة ======
+  // ====== بدء التشغيل ======
   await waitForAuth();
 });
