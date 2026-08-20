@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 🔒 رؤوس أمان أساسية (Content-Security-Policy عبر meta لأن الاستضافة الساكنة
-     لا تسمح بإرسال رؤوس HTTP مخصصة؛ يُفضَّل ضبطها أيضًا من إعدادات الاستضافة إن أمكن) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+<!-- 🔒 رؤوس أمان أساسية (محدثة بدون frame-ancestors المتوافقة مع وسم meta) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self';">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Anis CH — Plateforme d'Ingénierie & Solutions Logicielles Multi-Divisions</title>
 <meta name="description" content="Plateforme d'ingénierie et d'automatisation : électricité industrielle, domotique, intégration Odoo, HMI/MES et distribution de logiciels SaaS.">
