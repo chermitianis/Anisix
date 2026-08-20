@@ -57,14 +57,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function setGuardState(state, message) {
-    if (!guardMsg || !panel) return;
     if (state === 'ok') {
-      guardMsg.hidden = true;
-      panel.hidden = false;
+      if (guardMsg) guardMsg.hidden = true;
+      if (panel) panel.hidden = false;
     } else {
-      guardMsg.hidden = false;
-      panel.hidden = true;
-      guardMsg.textContent = message;
+      if (guardMsg) {
+        guardMsg.hidden = false;
+        guardMsg.textContent = message;
+      }
+      if (panel) panel.hidden = true;
     }
   }
 
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return decodeURIComponent(url.slice(idx + marker.length));
   }
 
-  // ====== تحميل البيانات ======
+  // ====== تعريف loadItems و loadPortfolioItems ======
 
   async function loadItems() {
     if (!listBody) return;
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => deleteItem(btn.dataset.id));
       });
     } catch (err) {
-      listBody.innerHTML = `<tr><td colspan="5">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+      listBody.innerHTML = `<tr><td colspan="5">❌ خطأ: ${err.message}</td></tr>`;
     }
   }
 
@@ -150,9 +151,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => deletePortfolioItem(btn.dataset.id));
       });
     } catch (err) {
-      portfolioItemsBody.innerHTML = `<tr><td colspan="4">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+      portfolioItemsBody.innerHTML = `<tr><td colspan="4">❌ خطأ: ${err.message}</td></tr>`;
     }
   }
+
+  // ====== رسائل التواصل ======
 
   async function loadContactMessages() {
     const body = document.getElementById('contactMessagesBody');
@@ -209,9 +212,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
     } catch (err) {
-      body.innerHTML = `<tr><td colspan="6">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="6">❌ خطأ: ${err.message}</td></tr>`;
     }
   }
+
+  // ====== إدارة المستخدمين والاشتراكات ======
 
   async function searchUsers(emailQuery) {
     const body = document.getElementById('usersBody');
@@ -267,37 +272,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
     } catch (err) {
-      body.innerHTML = `<tr><td colspan="5">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="5">❌ خطأ: ${err.message}</td></tr>`;
     }
   }
 
-  // ====== التحقق المحصن من الصلاحية (حل خطأ TypeError الجذري) ======
+  // ====== التحقق من الصلاحية ======
 
   async function checkAccess() {
-    console.log('🔍 Vérification des accès admin...');
+    console.log('🔍 Vérification des accès...');
 
     if (!window.Auth) {
       setGuardState('denied', '⏳ جارٍ تحميل نظام المصادقة...');
       return false;
     }
 
-    if (!window.Auth.isLoggedIn || !window.Auth.isLoggedIn()) {
+    const isLoggedIn = typeof window.Auth.isLoggedIn === 'function' ? window.Auth.isLoggedIn() : !!window.Auth.user;
+    if (!isLoggedIn) {
       setGuardState('denied', '🔒 هذه الصفحة مخصصة للمشرف فقط. سجّل الدخول بحساب المشرف من الصفحة الرئيسية.');
-      setTimeout(() => { window.location.href = '/index.html#hero'; }, 3000);
+      setTimeout(() => {
+        window.location.href = '/index.html#hero';
+      }, 3000);
       return false;
     }
 
-    // المعالجة الآمنة لحالة كائن isAdmin سواء كان دالة أو خاصية
-    let isAuthorized = false;
-    if (typeof window.Auth.isAdmin === 'function') {
-      isAuthorized = await window.Auth.isAdmin();
-    } else {
-      isAuthorized = Boolean(window.Auth.isAdmin);
-    }
-
-    if (!isAuthorized) {
-      setGuardState('denied', `⛔ حسابك (${window.Auth.user?.email || 'مجهول'}) مسجّل لكنه لا يملك صلاحية المشرف.`);
-      setTimeout(() => { window.location.href = '/index.html#hero'; }, 3000);
+    const isAdmin = typeof window.Auth.isAdmin === 'function' ? window.Auth.isAdmin() : !!window.Auth.isAdmin;
+    if (!isAdmin) {
+      setGuardState('denied', `⛔ حسابك (${window.Auth.user?.email}) مسجّل لكنه لا يملك صلاحية المشرف.`);
+      setTimeout(() => {
+        window.location.href = '/index.html#hero';
+      }, 3000);
       return false;
     }
 
@@ -373,30 +376,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ====== التهيئة المضمونة ======
+  // ====== التهيئة ======
 
-  if (!window.isSupabaseConfigured || !window.isSupabaseConfigured()) {
+  if (typeof window.isSupabaseConfigured === 'function' && !window.isSupabaseConfigured()) {
     setGuardState('denied', '⚠️ الموقع غير مربوط بقاعدة البيانات. عدّل js/config.js أولاً.');
     return;
   }
 
   async function waitForAuth(retries = 0) {
-    const maxRetries = 20;
+    const maxRetries = 15;
 
     if (window.Auth && typeof window.Auth.init === 'function') {
+      console.log('✅ Auth trouvé, initialisation...');
       try {
         await window.Auth.init();
-        const hasAccess = await checkAccess();
+        await checkAccess();
 
-        if (hasAccess) {
-          document.addEventListener('auth:changed', () => {
-            console.log('🔄 Auth changé, re-vérification...');
-            checkAccess();
-          });
-          setupAdminFeatures();
-        }
+        document.addEventListener('auth:changed', () => {
+          console.log('🔄 Auth changé, re-vérification...');
+          checkAccess();
+        });
+
+        setupAdminFeatures();
+        console.log('✅ Admin initialisé avec succès!');
       } catch (err) {
-        console.error('❌ Erreur d\'initialisation Auth:', err);
+        console.error('❌ Erreur lors de l\'initialisation de Auth:', err);
         setGuardState('denied', '❌ خطأ في تهيئة المصادقة: ' + err.message);
       }
       return;
@@ -404,14 +408,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     retries++;
     if (retries > maxRetries) {
-      setGuardState('denied', '❌ فشل تحميل نظام المصادقة. يرجى إعادة تحميل الصفحة.');
+      setGuardState('denied', '❌ فشل تحميل نظام المصادقة بعد ' + maxRetries + ' محاولات.');
       return;
     }
 
-    setTimeout(() => waitForAuth(retries), 300);
+    console.log(`⏳ Attente de Auth... (tentative ${retries}/${maxRetries})`);
+    setTimeout(() => waitForAuth(retries), 400);
   }
-
-  // ====== إعداد ميزات لوحة التحكم ======
 
   function setupAdminFeatures() {
     console.log('⚙️ Configuration des fonctionnalités admin...');
@@ -432,7 +435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (linkModeBox) linkModeBox.hidden = isFile;
         if (isFile && externalUrlLinkMode) {
           externalUrlLinkMode.value = '';
-          if (form.elements['externalUrl']) form.elements['externalUrl'].value = '';
+          if (form) form.elements['externalUrl'].value = '';
         }
         if (!isFile) {
           selectedFile = null;
@@ -459,7 +462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const file = e.dataTransfer.files[0];
         if (file) setSelectedFile(file);
       });
-      dropzone.addEventListener('click', () => fileInput && fileInput.click());
+      dropzone.addEventListener('click', () => fileInput.click());
     }
 
     fileInput && fileInput.addEventListener('change', () => {
@@ -475,13 +478,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (file.size > MAX_FILE_SIZE) {
         showToast(`⚠️ الملف كبير جداً (الحد الأقصى ${MAX_FILE_SIZE / (1024 * 1024)} ميجابايت)`, 'error');
-        if (fileInput) fileInput.value = '';
+        fileInput.value = '';
         return;
       }
 
       if (!isFileAllowed(file, ALLOWED_SOFTWARE_EXTS)) {
         showToast(`⚠️ امتداد غير مسموح. الامتدادات المقبولة: ${ALLOWED_SOFTWARE_EXTS.join(', ')}`, 'error');
-        if (fileInput) fileInput.value = '';
+        fileInput.value = '';
         return;
       }
 
@@ -571,7 +574,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedFile = null;
         if (fileNameLabel) fileNameLabel.textContent = '';
         if (externalUrlLinkMode) externalUrlLinkMode.value = '';
-        if (form.elements['externalUrl']) form.elements['externalUrl'].value = '';
+        form.elements['externalUrl'].value = '';
         await loadItems();
 
       } catch (err) {
@@ -579,7 +582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           statusBox.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
           statusBox.classList.add('is-error');
         }
-        showToast('❌ تعذّر إتمام العملية.', 'error');
+        showToast('❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.'), 'error');
       } finally {
         if (submitBtn) submitBtn.disabled = false;
         setTimeout(() => {
@@ -615,7 +618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const file = e.dataTransfer.files[0];
         if (file) setSelectedPortfolioFile(file);
       });
-      portfolioDropzone.addEventListener('click', () => portfolioFileInput && portfolioFileInput.click());
+      portfolioDropzone.addEventListener('click', () => portfolioFileInput.click());
     }
 
     portfolioFileInput && portfolioFileInput.addEventListener('change', () => {
@@ -632,13 +635,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const MAX_PORTFOLIO_SIZE = 10 * 1024 * 1024;
       if (file.size > MAX_PORTFOLIO_SIZE) {
         showToast(`⚠️ الملف كبير جداً (الحد الأقصى ${MAX_PORTFOLIO_SIZE / (1024 * 1024)} ميجابايت)`, 'error');
-        if (portfolioFileInput) portfolioFileInput.value = '';
+        portfolioFileInput.value = '';
         return;
       }
 
       if (!isFileAllowed(file, ALLOWED_PORTFOLIO_EXTS)) {
         showToast(`⚠️ امتداد غير مسموح. الامتدادات المقبولة: ${ALLOWED_PORTFOLIO_EXTS.join(', ')}`, 'error');
-        if (portfolioFileInput) portfolioFileInput.value = '';
+        portfolioFileInput.value = '';
         return;
       }
 
@@ -722,7 +725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           portfolioStatus.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
           portfolioStatus.classList.add('is-error');
         }
-        showToast('❌ تعذّر إتمام العملية.', 'error');
+        showToast('❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.'), 'error');
       } finally {
         if (submitBtn) submitBtn.disabled = false;
         setTimeout(() => {
@@ -735,6 +738,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ====== بدء التهيئة ======
   await waitForAuth();
 });
