@@ -8,7 +8,7 @@
    - Protection anti double-soumission (spam / brute-force côté client)
    - Messages d'erreur génériques (ne révèle jamais si un e-mail existe)
    - Nettoyage systématique des entrées avant envoi
-   - Validation directe du compte administrateur (aniss.chermitti9@gmail.com)
+   - Déconnexion globale (toutes les sessions) disponible
    ========================================================= */
 
 (function () {
@@ -18,9 +18,6 @@
   let currentUser = null;
   let isAdminValue = false;
   let currentPlan = 'free';
-
-  // البريد الإلكتروني المعتمد للمطور والمشرف
-  const ADMIN_EMAIL = 'aniss.chermitti9@gmail.com';
 
   const authModal = document.getElementById('authModal');
   const authModalTitle = document.getElementById('authModalTitle');
@@ -68,7 +65,6 @@
     if (authError) authError.textContent = '';
   }
 
-  // رسائل خطأ عامة لمنع استكشاف الحسابات (Anti user-enumeration)
   function genericAuthError(err) {
     const raw = (err && err.message) ? err.message.toLowerCase() : '';
     if (raw.includes('invalid login credentials')) {
@@ -112,7 +108,7 @@
     if (user) {
       if (guestState) guestState.hidden = true;
       if (userState) userState.hidden = false;
-      if (userEmail) userEmail.textContent = user.email; // textContent حماية ضد XSS
+      if (userEmail) userEmail.textContent = user.email;
       if (adminLink) adminLink.hidden = !isAdminValue;
     } else {
       if (guestState) guestState.hidden = false;
@@ -120,38 +116,10 @@
     }
   }
 
-  /**
-   * التحقق المزدوج المحصن من صلاحية المشرف
-   */
-  async function verifyAdminRole(user) {
-    if (!user || !user.email) return false;
-
-    // 1. التحقق المباشر من البريد الإلكتروني للمطور
-    const isEmailAdmin = user.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-    if (!isEmailAdmin) return false;
-
-    try {
-      // 2. مطابقة الصلاحيات من الجدول المخصص
-      const { data: profile } = await window.supabaseClient
-        .from('profiles')
-        .select('is_admin, role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profile) {
-        return Boolean(profile.is_admin || profile.role === 'admin' || isEmailAdmin);
-      }
-    } catch (e) {
-      console.warn('⚠️ Impossible de vérifier le profil admin depuis la base de données:', e);
-    }
-
-    return isEmailAdmin;
-  }
-
   // === Vérification de l'état ===
 
   async function checkUserState() {
-    if (!window.supabaseClient) { updateUIForUser(null); return null; }
+    if (!window.supabaseClient) { updateUIForUser(null); return; }
 
     try {
       const { data: { session } } = await window.supabaseClient.auth.getSession();
@@ -159,14 +127,13 @@
         currentSession = session;
         currentUser = session.user;
 
-        isAdminValue = await verifyAdminRole(session.user);
-
         const { data: profile } = await window.supabaseClient
           .from('profiles')
-          .select('subscription_plan')
+          .select('is_admin, subscription_plan')
           .eq('id', session.user.id)
           .maybeSingle();
 
+        isAdminValue = profile ? !!profile.is_admin : false;
         currentPlan = profile ? (profile.subscription_plan || 'free') : 'free';
 
         updateUIForUser(session.user);
@@ -174,7 +141,7 @@
         document.dispatchEvent(new CustomEvent('auth:changed', {
           detail: { user: session.user, isAdmin: isAdminValue, plan: currentPlan }
         }));
-        return session.user;
+        return;
       }
     } catch (e) {
       console.warn('⚠️ Supabase non disponible, mode invité activé.');
@@ -186,7 +153,6 @@
     currentPlan = 'free';
     updateUIForUser(null);
     document.dispatchEvent(new CustomEvent('auth:changed', { detail: { user: null, isAdmin: false, plan: 'free' } }));
-    return null;
   }
 
   // === Fonctions d'authentification ===
@@ -233,8 +199,15 @@
 
   async function updatePassword(newPassword) {
     if (!window.supabaseClient) throw new Error('Supabase non initialisé.');
-    const { error } = await window.supabaseClient.auth.updateUser({ password: newPassword });
+    
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (!session) {
+      throw new Error('جلسة إعادة التعيين منتهية أو غير صالحة. يرجى طلب رابط جديد عبر "نسيت كلمة المرور".');
+    }
+
+    const { data, error } = await window.supabaseClient.auth.updateUser({ password: newPassword });
     if (error) throw error;
+    return data;
   }
 
   // === OAuth ===
@@ -255,30 +228,30 @@
     }
   }
 
-  // === API publique (متوافقة كدالة وكخاصية) ===
+  // === API publique الجسرة بالتوافق المزدوج ===
 
-  window.Auth = {
-    get session() { return currentSession; },
-    get user() { return currentUser; },
-    get plan() { return currentPlan; },
-    
-    // دعم دالة isAdmin لدعم استدعاأت admin.js بشكل متوافق (async/sync)
-    isAdmin: function () {
-      if (!currentUser) return false;
-      return verifyAdminRole(currentUser);
-    },
-
-    isLoggedIn: function () { return !!currentUser; },
-    init: checkUserState,
-    signIn: signIn,
-    signUp: signUp,
-    signOut: signOut,
-    signInWithProvider: signInWithProvider,
-    sendPasswordReset: sendPasswordReset,
-    updatePassword: updatePassword,
-    openModal: openAuthModal,
-    closeModal: closeAuthModal,
+  const authApi = function () {
+    return isAdminValue;
   };
+
+  Object.defineProperties(authApi, {
+    session: { get: function () { return currentSession; } },
+    user: { get: function () { return currentUser; } },
+    isAdmin: { get: function () { return isAdminValue; } },
+    plan: { get: function () { return currentPlan; } },
+    isLoggedIn: { value: function () { return !!currentUser; } },
+    init: { value: checkUserState },
+    signIn: { value: signIn },
+    signUp: { value: signUp },
+    signOut: { value: signOut },
+    signInWithProvider: { value: signInWithProvider },
+    sendPasswordReset: { value: sendPasswordReset },
+    updatePassword: { value: updatePassword },
+    openModal: { value: openAuthModal },
+    closeModal: { value: closeAuthModal }
+  });
+
+  window.Auth = authApi;
 
   console.log('✅ Auth initialisé avec succès (mode sécurisé)');
 
