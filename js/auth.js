@@ -8,7 +8,7 @@
    - Protection anti double-soumission (spam / brute-force côté client)
    - Messages d'erreur génériques (ne révèle jamais si un e-mail existe)
    - Nettoyage systématique des entrées avant envoi
-   - Déconnexion globale (toutes les sessions) disponible
+   - Validation directe du compte administrateur (aniss.chermitti9@gmail.com)
    ========================================================= */
 
 (function () {
@@ -18,6 +18,9 @@
   let currentUser = null;
   let isAdminValue = false;
   let currentPlan = 'free';
+
+  // البريد الإلكتروني المعتمد للمطور والمشرف
+  const ADMIN_EMAIL = 'aniss.chermitti9@gmail.com';
 
   const authModal = document.getElementById('authModal');
   const authModalTitle = document.getElementById('authModalTitle');
@@ -65,7 +68,7 @@
     if (authError) authError.textContent = '';
   }
 
-  // رسائل خطأ عامة كي لا نكشف ما إذا كان البريد مسجَّلًا أم لا (Anti user-enumeration)
+  // رسائل خطأ عامة لمنع استكشاف الحسابات (Anti user-enumeration)
   function genericAuthError(err) {
     const raw = (err && err.message) ? err.message.toLowerCase() : '';
     if (raw.includes('invalid login credentials')) {
@@ -109,7 +112,7 @@
     if (user) {
       if (guestState) guestState.hidden = true;
       if (userState) userState.hidden = false;
-      if (userEmail) userEmail.textContent = user.email; // textContent = آمن ضد XSS
+      if (userEmail) userEmail.textContent = user.email; // textContent حماية ضد XSS
       if (adminLink) adminLink.hidden = !isAdminValue;
     } else {
       if (guestState) guestState.hidden = false;
@@ -117,10 +120,38 @@
     }
   }
 
+  /**
+   * التحقق المزدوج المحصن من صلاحية المشرف
+   */
+  async function verifyAdminRole(user) {
+    if (!user || !user.email) return false;
+
+    // 1. التحقق المباشر من البريد الإلكتروني للمطور
+    const isEmailAdmin = user.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+    if (!isEmailAdmin) return false;
+
+    try {
+      // 2. مطابقة الصلاحيات من الجدول المخصص
+      const { data: profile } = await window.supabaseClient
+        .from('profiles')
+        .select('is_admin, role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profile) {
+        return Boolean(profile.is_admin || profile.role === 'admin' || isEmailAdmin);
+      }
+    } catch (e) {
+      console.warn('⚠️ Impossible de vérifier le profil admin depuis la base de données:', e);
+    }
+
+    return isEmailAdmin;
+  }
+
   // === Vérification de l'état ===
 
   async function checkUserState() {
-    if (!window.supabaseClient) { updateUIForUser(null); return; }
+    if (!window.supabaseClient) { updateUIForUser(null); return null; }
 
     try {
       const { data: { session } } = await window.supabaseClient.auth.getSession();
@@ -128,13 +159,14 @@
         currentSession = session;
         currentUser = session.user;
 
+        isAdminValue = await verifyAdminRole(session.user);
+
         const { data: profile } = await window.supabaseClient
           .from('profiles')
-          .select('is_admin, subscription_plan')
+          .select('subscription_plan')
           .eq('id', session.user.id)
           .maybeSingle();
 
-        isAdminValue = profile ? !!profile.is_admin : false;
         currentPlan = profile ? (profile.subscription_plan || 'free') : 'free';
 
         updateUIForUser(session.user);
@@ -142,7 +174,7 @@
         document.dispatchEvent(new CustomEvent('auth:changed', {
           detail: { user: session.user, isAdmin: isAdminValue, plan: currentPlan }
         }));
-        return;
+        return session.user;
       }
     } catch (e) {
       console.warn('⚠️ Supabase non disponible, mode invité activé.');
@@ -154,6 +186,7 @@
     currentPlan = 'free';
     updateUIForUser(null);
     document.dispatchEvent(new CustomEvent('auth:changed', { detail: { user: null, isAdmin: false, plan: 'free' } }));
+    return null;
   }
 
   // === Fonctions d'authentification ===
@@ -222,13 +255,19 @@
     }
   }
 
-  // === API publique ===
+  // === API publique (متوافقة كدالة وكخاصية) ===
 
   window.Auth = {
     get session() { return currentSession; },
     get user() { return currentUser; },
-    get isAdmin() { return isAdminValue; },
     get plan() { return currentPlan; },
+    
+    // دعم دالة isAdmin لدعم استدعاأت admin.js بشكل متوافق (async/sync)
+    isAdmin: function () {
+      if (!currentUser) return false;
+      return verifyAdminRole(currentUser);
+    },
+
     isLoggedIn: function () { return !!currentUser; },
     init: checkUserState,
     signIn: signIn,
@@ -310,7 +349,6 @@
         authForgotBtn.disabled = true;
         try {
           await sendPasswordReset(email);
-          // رسالة موحّدة دائمًا (سواء كان البريد موجودًا أم لا) لمنع تسريب وجود الحساب
           setSuccess('✅ إذا كان هذا البريد مسجّلاً لدينا، ستصلك رسالة لإعادة تعيين كلمة المرور خلال دقائق.');
         } catch (err) {
           console.error(err);
@@ -429,7 +467,6 @@
       });
     }
 
-    // فتح نافذة إعادة التعيين تلقائيًا إذا وصل المستخدم عبر رابط البريد
     if (window.location.hash.includes('reset-password') || window.location.hash.includes('type=recovery')) {
       openResetModal();
     }
