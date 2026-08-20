@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const externalUrlLinkMode = document.getElementById('externalUrlLinkMode');
 
   // ====== قيود الأمان ======
-  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
-  const ALLOWED_SOFTWARE_EXTS = ['apk', 'exe', 'zip', 'pdf', 'mp4', 'txt', 'png', 'jpg', 'jpeg', 'webp'];
+  const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200 MB
+  const ALLOWED_SOFTWARE_EXTS = ['apk', 'exe', 'msi', 'zip', 'rar', '7z', 'pdf', 'mp4', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'dmg', 'iso'];
   const ALLOWED_PORTFOLIO_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'mp4'];
 
   let selectedFile = null;
@@ -57,15 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function setGuardState(state, message) {
+    if (!guardMsg || !panel) return;
     if (state === 'ok') {
-      if (guardMsg) guardMsg.hidden = true;
-      if (panel) panel.hidden = false;
+      guardMsg.hidden = true;
+      panel.hidden = false;
     } else {
-      if (guardMsg) {
-        guardMsg.hidden = false;
-        guardMsg.textContent = message;
-      }
-      if (panel) panel.hidden = true;
+      guardMsg.hidden = false;
+      panel.hidden = true;
+      guardMsg.textContent = message;
     }
   }
 
@@ -75,7 +74,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     return div.innerHTML;
   }
 
-  // ====== تعريف loadItems و loadPortfolioItems ======
+  function extractStoragePath(url, bucket) {
+    if (!url) return null;
+    const marker = `/storage/v1/object/public/${bucket}/`;
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(url.slice(idx + marker.length));
+  }
+
+  // ====== تحميل البيانات ======
 
   async function loadItems() {
     if (!listBody) return;
@@ -99,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${escapeAdminHTML(item.name_ar)}</td>
           <td><span class="soft-badge">${escapeAdminHTML(item.category)}</span></td>
           <td>${item.version ? 'v' + escapeAdminHTML(item.version) : '—'}</td>
-          <td>${item.file_url ? '📎 ملف' : ''} ${item.external_url ? '🔗 رابط' : ''}</td>
+          <td>${item.file_url ? '📎 ملف' : ''} ${item.external_url ? '🔗 رابط' : ''} <span class="soft-plan-lock">${escapeAdminHTML(item.required_plan || 'free')}</span></td>
           <td><button class="btn btn--sm btn--ghost admin-delete-btn" data-id="${item.id}">🗑️ حذف</button></td>
         </tr>
       `).join('');
@@ -108,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => deleteItem(btn.dataset.id));
       });
     } catch (err) {
-      listBody.innerHTML = `<tr><td colspan="5">❌ خطأ: ${err.message}</td></tr>`;
+      listBody.innerHTML = `<tr><td colspan="5">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
     }
   }
 
@@ -143,15 +150,131 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => deletePortfolioItem(btn.dataset.id));
       });
     } catch (err) {
-      portfolioItemsBody.innerHTML = `<tr><td colspan="4">❌ خطأ: ${err.message}</td></tr>`;
+      portfolioItemsBody.innerHTML = `<tr><td colspan="4">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
     }
   }
 
-  // ====== التحقق من الصلاحية (checkAccess) ======
+  async function loadContactMessages() {
+    const body = document.getElementById('contactMessagesBody');
+    const badge = document.getElementById('unreadBadge');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="6">⏳ جارٍ التحميل...</td></tr>';
+
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        body.innerHTML = '<tr><td colspan="6">📭 لا توجد رسائل بعد.</td></tr>';
+        if (badge) badge.hidden = true;
+        return;
+      }
+
+      const unreadCount = data.filter(m => !m.is_read).length;
+      if (badge) {
+        badge.hidden = unreadCount === 0;
+        badge.textContent = unreadCount + ' غير مقروءة';
+      }
+
+      body.innerHTML = data.map(m => `
+        <tr style="${m.is_read ? '' : 'font-weight:700'}">
+          <td>${escapeAdminHTML(m.name)}</td>
+          <td>${escapeAdminHTML(m.contact_info)}</td>
+          <td>${escapeAdminHTML(m.service_type)}</td>
+          <td style="max-width:260px;white-space:pre-wrap">${escapeAdminHTML(m.details)}</td>
+          <td>${new Date(m.created_at).toLocaleDateString('ar')}</td>
+          <td style="white-space:nowrap">
+            ${!m.is_read ? `<button class="btn btn--sm btn--ghost msg-read-btn" data-id="${m.id}">✔️ مقروء</button>` : ''}
+            <button class="btn btn--sm btn--ghost msg-delete-btn" data-id="${m.id}">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+
+      body.querySelectorAll('.msg-read-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          await window.supabaseClient.from('contact_messages').update({ is_read: true }).eq('id', btn.dataset.id);
+          await loadContactMessages();
+        });
+      });
+      body.querySelectorAll('.msg-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('⚠️ حذف هذه الرسالة نهائيًا؟')) return;
+          await window.supabaseClient.from('contact_messages').delete().eq('id', btn.dataset.id);
+          await loadContactMessages();
+        });
+      });
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="6">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+    }
+  }
+
+  async function searchUsers(emailQuery) {
+    const body = document.getElementById('usersBody');
+    if (!body) return;
+    if (!emailQuery || emailQuery.length < 3) {
+      body.innerHTML = '<tr><td colspan="5">اكتب 3 أحرف على الأقل من البريد للبحث</td></tr>';
+      return;
+    }
+    body.innerHTML = '<tr><td colspan="5">⏳ جارٍ البحث...</td></tr>';
+
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('profiles')
+        .select('id, email, full_name, subscription_plan, is_admin, created_at')
+        .ilike('email', `%${emailQuery}%`)
+        .limit(20);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        body.innerHTML = '<tr><td colspan="5">لا نتائج.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = data.map(u => `
+        <tr>
+          <td>${escapeAdminHTML(u.email)} ${u.is_admin ? '👑' : ''}</td>
+          <td>${escapeAdminHTML(u.full_name || '—')}</td>
+          <td>
+            <select class="plan-select" data-id="${u.id}" ${u.is_admin ? 'disabled title="حساب مشرف"' : ''}>
+              <option value="free" ${u.subscription_plan === 'free' ? 'selected' : ''}>مجاني</option>
+              <option value="pro" ${u.subscription_plan === 'pro' ? 'selected' : ''}>Pro</option>
+              <option value="enterprise" ${u.subscription_plan === 'enterprise' ? 'selected' : ''}>Enterprise</option>
+            </select>
+          </td>
+          <td>${new Date(u.created_at).toLocaleDateString('ar')}</td>
+          <td></td>
+        </tr>
+      `).join('');
+
+      body.querySelectorAll('.plan-select').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          try {
+            const { error } = await window.supabaseClient
+              .from('profiles')
+              .update({ subscription_plan: sel.value })
+              .eq('id', sel.dataset.id);
+            if (error) throw error;
+            showToast('✅ تم تحديث الخطة بنجاح.', 'success');
+          } catch (err) {
+            showToast('❌ تعذّر التحديث: ' + err.message, 'error');
+          }
+        });
+      });
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="5">❌ خطأ: ${escapeAdminHTML(err.message)}</td></tr>`;
+    }
+  }
+
+  // ====== التحقق المحصن من الصلاحية (حل خطأ TypeError الجذري) ======
 
   async function checkAccess() {
-    console.log('🔍 Vérification des accès...');
-    console.log('window.Auth:', window.Auth);
+    console.log('🔍 Vérification des accès admin...');
 
     if (!window.Auth) {
       setGuardState('denied', '⏳ جارٍ تحميل نظام المصادقة...');
@@ -160,34 +283,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!window.Auth.isLoggedIn || !window.Auth.isLoggedIn()) {
       setGuardState('denied', '🔒 هذه الصفحة مخصصة للمشرف فقط. سجّل الدخول بحساب المشرف من الصفحة الرئيسية.');
-      setTimeout(() => {
-        window.location.href = '/index.html#hero';
-      }, 3000);
+      setTimeout(() => { window.location.href = '/index.html#hero'; }, 3000);
       return false;
     }
 
-    // الفحص الآمن لـ isAdmin سواء كان Getter أو Function
-    const isAdminUser = typeof window.Auth.isAdmin === 'function' 
-      ? await window.Auth.isAdmin() 
-      : window.Auth.isAdmin;
+    // المعالجة الآمنة لحالة كائن isAdmin سواء كان دالة أو خاصية
+    let isAuthorized = false;
+    if (typeof window.Auth.isAdmin === 'function') {
+      isAuthorized = await window.Auth.isAdmin();
+    } else {
+      isAuthorized = Boolean(window.Auth.isAdmin);
+    }
 
-    if (!isAdminUser) {
-      setGuardState('denied', `⛔ حسابك (${window.Auth.user?.email || ''}) مسجّل لكنه لا يملك صلاحية المشرف.`);
-      setTimeout(() => {
-        window.location.href = '/index.html#hero';
-      }, 3000);
+    if (!isAuthorized) {
+      setGuardState('denied', `⛔ حسابك (${window.Auth.user?.email || 'مجهول'}) مسجّل لكنه لا يملك صلاحية المشرف.`);
+      setTimeout(() => { window.location.href = '/index.html#hero'; }, 3000);
       return false;
     }
 
     setGuardState('ok');
-    
+
     try {
       await loadItems();
       await loadPortfolioItems();
+      await loadContactMessages();
     } catch (err) {
       console.error('❌ Erreur lors du chargement des données:', err);
     }
-    
+
     return true;
   }
 
@@ -207,13 +330,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (error) throw error;
 
       if (item && item.file_url) {
-        const path = item.file_url.split('/').pop();
-        if (path) {
-          await window.supabaseClient
-            .storage.from(window.APP_CONFIG.STORAGE_BUCKET)
-            .remove([path])
-            .catch(() => {});
-        }
+        await window.supabaseClient
+          .storage.from(window.APP_CONFIG.STORAGE_BUCKET)
+          .remove([item.file_url])
+          .catch(() => {});
       }
 
       showToast('✅ تم الحذف بنجاح.', 'success');
@@ -237,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (error) throw error;
 
       if (item && item.media_url) {
-        const path = item.media_url.split('/').pop();
+        const path = extractStoragePath(item.media_url, window.APP_CONFIG.PORTFOLIO_BUCKET);
         if (path) {
           await window.supabaseClient
             .storage.from(window.APP_CONFIG.PORTFOLIO_BUCKET)
@@ -253,31 +373,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ====== التهيئة للانتظار والبدء ======
+  // ====== التهيئة المضمونة ======
 
-  if (typeof window.isSupabaseConfigured === 'function' && !window.isSupabaseConfigured()) {
+  if (!window.isSupabaseConfigured || !window.isSupabaseConfigured()) {
     setGuardState('denied', '⚠️ الموقع غير مربوط بقاعدة البيانات. عدّل js/config.js أولاً.');
     return;
   }
 
   async function waitForAuth(retries = 0) {
-    const maxRetries = 15;
-    
+    const maxRetries = 20;
+
     if (window.Auth && typeof window.Auth.init === 'function') {
-      console.log('✅ Auth trouvé, initialisation...');
       try {
         await window.Auth.init();
-        await checkAccess();
-        
-        document.addEventListener('auth:changed', () => {
-          console.log('🔄 Auth changé, re-vérification...');
-          checkAccess();
-        });
-        
-        setupAdminFeatures();
-        console.log('✅ Admin initialisé avec succès!');
+        const hasAccess = await checkAccess();
+
+        if (hasAccess) {
+          document.addEventListener('auth:changed', () => {
+            console.log('🔄 Auth changé, re-vérification...');
+            checkAccess();
+          });
+          setupAdminFeatures();
+        }
       } catch (err) {
-        console.error('❌ Erreur lors de l\'initialisation de Auth:', err);
+        console.error('❌ Erreur d\'initialisation Auth:', err);
         setGuardState('denied', '❌ خطأ في تهيئة المصادقة: ' + err.message);
       }
       return;
@@ -285,18 +404,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     retries++;
     if (retries > maxRetries) {
-      setGuardState('denied', '❌ فشل تحميل نظام المصادقة بعد ' + maxRetries + ' محاولات.');
+      setGuardState('denied', '❌ فشل تحميل نظام المصادقة. يرجى إعادة تحميل الصفحة.');
       return;
     }
 
-    console.log(`⏳ Attente de Auth... (tentative ${retries}/${maxRetries})`);
-    setTimeout(() => waitForAuth(retries), 400);
+    setTimeout(() => waitForAuth(retries), 300);
   }
 
-  // ====== إعداد ميزات عناصر التحكم والرفع ======
+  // ====== إعداد ميزات لوحة التحكم ======
 
   function setupAdminFeatures() {
     console.log('⚙️ Configuration des fonctionnalités admin...');
+
+    const userSearchInput = document.getElementById('userSearchInput');
+    if (userSearchInput) {
+      let debounceTimer = null;
+      userSearchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => searchUsers(userSearchInput.value.trim()), 400);
+      });
+    }
 
     uploadModeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
@@ -335,11 +462,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       dropzone.addEventListener('click', () => fileInput && fileInput.click());
     }
 
-    if (fileInput) {
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files[0]) setSelectedFile(fileInput.files[0]);
-      });
-    }
+    fileInput && fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) setSelectedFile(fileInput.files[0]);
+    });
 
     function setSelectedFile(file) {
       if (!file) {
@@ -364,113 +489,108 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (fileNameLabel) fileNameLabel.textContent = `${file.name} — ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
     }
 
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    form && form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (statusBox) {
+        statusBox.textContent = '';
+        statusBox.className = 'upload-status';
+      }
+
+      const uploadMode = document.querySelector('input[name="uploadMode"]:checked').value;
+      const fd = new FormData(form);
+
+      const payload = {
+        category: fd.get('category'),
+        badge_label: fd.get('badgeLabel') || null,
+        name_ar: fd.get('nameAr'),
+        name_fr: fd.get('nameFr') || null,
+        name_en: fd.get('nameEn') || null,
+        description_ar: fd.get('descAr'),
+        description_fr: fd.get('descFr') || null,
+        description_en: fd.get('descEn') || null,
+        version: fd.get('version') || null,
+        meta_text: fd.get('metaText') || null,
+        external_url: fd.get('externalUrl') || null,
+        required_plan: fd.get('requiredPlan') || 'free',
+        is_published: true
+      };
+
+      if (!payload.name_ar || !payload.description_ar || !payload.category) {
         if (statusBox) {
-          statusBox.textContent = '';
-          statusBox.className = 'upload-status';
+          statusBox.textContent = '⚠️ الحقول الأساسية (الاسم بالعربي، الوصف، التصنيف) مطلوبة.';
+          statusBox.classList.add('is-error');
+        }
+        return;
+      }
+
+      if (uploadMode === 'file' && !selectedFile) {
+        if (statusBox) {
+          statusBox.textContent = '⚠️ الرجاء اختيار ملف للرفع، أو التبديل لوضع "رابط خارجي فقط".';
+          statusBox.classList.add('is-error');
+        }
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      if (statusBox) statusBox.textContent = '⏳ جارٍ الرفع...';
+
+      try {
+        if (uploadMode === 'file' && selectedFile) {
+          const safeName = selectedFile.name.replace(/[^\w.\-]/g, '_');
+          const path = `${payload.category}/${Date.now()}_${safeName}`;
+
+          if (progressBar) {
+            progressBar.hidden = false;
+            progressBar.value = 10;
+          }
+
+          const { error: uploadError } = await window.supabaseClient
+            .storage.from(window.APP_CONFIG.STORAGE_BUCKET)
+            .upload(path, selectedFile, { cacheControl: '3600', upsert: false });
+
+          if (uploadError) throw uploadError;
+          if (progressBar) progressBar.value = 80;
+
+          payload.file_url = path;
+          payload.file_name = selectedFile.name;
+          if (progressBar) progressBar.value = 100;
         }
 
-        const uploadMode = document.querySelector('input[name="uploadMode"]:checked').value;
-        const fd = new FormData(form);
+        const { error: insertError } = await window.supabaseClient.from('software_items').insert(payload);
+        if (insertError) throw insertError;
 
-        const payload = {
-          category: fd.get('category'),
-          badge_label: fd.get('badgeLabel') || null,
-          name_ar: fd.get('nameAr'),
-          name_fr: fd.get('nameFr') || null,
-          name_en: fd.get('nameEn') || null,
-          description_ar: fd.get('descAr'),
-          description_fr: fd.get('descFr') || null,
-          description_en: fd.get('descEn') || null,
-          version: fd.get('version') || null,
-          meta_text: fd.get('metaText') || null,
-          external_url: fd.get('externalUrl') || null,
-          is_published: true
-        };
-
-        if (!payload.name_ar || !payload.description_ar || !payload.category) {
-          if (statusBox) {
-            statusBox.textContent = '⚠️ الحقول الأساسية مطلوبة.';
-            statusBox.classList.add('is-error');
-          }
-          return;
+        if (statusBox) {
+          statusBox.textContent = '✅ تمت الإضافة بنجاح — العنصر ظاهر الآن في الموقع.';
+          statusBox.classList.remove('is-error');
+          statusBox.classList.add('is-success');
         }
+        showToast('✅ تمت الإضافة بنجاح!', 'success');
 
-        if (uploadMode === 'file' && !selectedFile) {
-          if (statusBox) {
-            statusBox.textContent = '⚠️ الرجاء اختيار ملف للرفع.';
-            statusBox.classList.add('is-error');
-          }
-          return;
+        form.reset();
+        selectedFile = null;
+        if (fileNameLabel) fileNameLabel.textContent = '';
+        if (externalUrlLinkMode) externalUrlLinkMode.value = '';
+        if (form.elements['externalUrl']) form.elements['externalUrl'].value = '';
+        await loadItems();
+
+      } catch (err) {
+        if (statusBox) {
+          statusBox.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
+          statusBox.classList.add('is-error');
         }
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) submitBtn.disabled = true;
-        if (statusBox) statusBox.textContent = '⏳ جارٍ الرفع...';
-
-        try {
-          if (uploadMode === 'file' && selectedFile) {
-            const safeName = selectedFile.name.replace(/[^\w.\-]/g, '_');
-            const path = `${payload.category}/${Date.now()}_${safeName}`;
-
-            if (progressBar) {
-              progressBar.hidden = false;
-              progressBar.value = 10;
-            }
-
-            const { error: uploadError } = await window.supabaseClient
-              .storage.from(window.APP_CONFIG.STORAGE_BUCKET)
-              .upload(path, selectedFile, { cacheControl: '3600', upsert: false });
-
-            if (uploadError) throw uploadError;
-            if (progressBar) progressBar.value = 80;
-
-            const { data: publicData } = window.supabaseClient
-              .storage.from(window.APP_CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-
-            payload.file_url = publicData.publicUrl;
-            payload.file_name = selectedFile.name;
-            if (progressBar) progressBar.value = 100;
+        showToast('❌ تعذّر إتمام العملية.', 'error');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        setTimeout(() => {
+          if (progressBar) {
+            progressBar.hidden = true;
+            progressBar.value = 0;
           }
+        }, 800);
+      }
+    });
 
-          const { error: insertError } = await window.supabaseClient.from('software_items').insert(payload);
-          if (insertError) throw insertError;
-
-          if (statusBox) {
-            statusBox.textContent = '✅ تمت الإضافة بنجاح.';
-            statusBox.classList.remove('is-error');
-            statusBox.classList.add('is-success');
-          }
-          showToast('✅ تمت الإضافة بنجاح!', 'success');
-
-          form.reset();
-          selectedFile = null;
-          if (fileNameLabel) fileNameLabel.textContent = '';
-          if (externalUrlLinkMode) externalUrlLinkMode.value = '';
-          if (form.elements['externalUrl']) form.elements['externalUrl'].value = '';
-          await loadItems();
-
-        } catch (err) {
-          if (statusBox) {
-            statusBox.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
-            statusBox.classList.add('is-error');
-            showToast(statusBox.textContent, 'error');
-          }
-        } finally {
-          if (submitBtn) submitBtn.disabled = false;
-          setTimeout(() => {
-            if (progressBar) {
-              progressBar.hidden = true;
-              progressBar.value = 0;
-            }
-          }, 800);
-        }
-      });
-    }
-
-    // ====== معرض الأعمال ======
     const portfolioForm = document.getElementById('portfolioForm');
     const portfolioDropzone = document.getElementById('portfolioDropzone');
     const portfolioFileInput = document.getElementById('portfolioFileInput');
@@ -498,11 +618,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       portfolioDropzone.addEventListener('click', () => portfolioFileInput && portfolioFileInput.click());
     }
 
-    if (portfolioFileInput) {
-      portfolioFileInput.addEventListener('change', () => {
-        if (portfolioFileInput.files[0]) setSelectedPortfolioFile(portfolioFileInput.files[0]);
-      });
-    }
+    portfolioFileInput && portfolioFileInput.addEventListener('change', () => {
+      if (portfolioFileInput.files[0]) setSelectedPortfolioFile(portfolioFileInput.files[0]);
+    });
 
     function setSelectedPortfolioFile(file) {
       if (!file) {
@@ -528,97 +646,95 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (portfolioFileNameLabel) portfolioFileNameLabel.textContent = `${file.name} — ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
     }
 
-    if (portfolioForm) {
-      portfolioForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    portfolioForm && portfolioForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (portfolioStatus) {
+        portfolioStatus.textContent = '';
+        portfolioStatus.className = 'upload-status';
+      }
+
+      const fd = new FormData(portfolioForm);
+      const payload = {
+        category: fd.get('category'),
+        title_ar: fd.get('titleAr'),
+        title_fr: fd.get('titleFr') || null,
+        title_en: fd.get('titleEn') || null,
+        is_published: true
+      };
+
+      if (!payload.title_ar || !payload.category) {
         if (portfolioStatus) {
-          portfolioStatus.textContent = '';
-          portfolioStatus.className = 'upload-status';
+          portfolioStatus.textContent = '⚠️ العنوان بالعربي والتصنيف مطلوبان.';
+          portfolioStatus.classList.add('is-error');
         }
+        return;
+      }
 
-        const fd = new FormData(portfolioForm);
-        const payload = {
-          category: fd.get('category'),
-          title_ar: fd.get('titleAr'),
-          title_fr: fd.get('titleFr') || null,
-          title_en: fd.get('titleEn') || null,
-          is_published: true
-        };
+      if (!selectedPortfolioFile) {
+        if (portfolioStatus) {
+          portfolioStatus.textContent = '⚠️ الرجاء اختيار صورة أو فيديو.';
+          portfolioStatus.classList.add('is-error');
+        }
+        return;
+      }
 
-        if (!payload.title_ar || !payload.category) {
-          if (portfolioStatus) {
-            portfolioStatus.textContent = '⚠️ العنوان بالعربي والتصنيف مطلوبان.';
-            portfolioStatus.classList.add('is-error');
+      const submitBtn = portfolioForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      if (portfolioStatus) portfolioStatus.textContent = '⏳ جارٍ الرفع...';
+      if (portfolioProgress) {
+        portfolioProgress.hidden = false;
+        portfolioProgress.value = 10;
+      }
+
+      try {
+        const safeName = selectedPortfolioFile.name.replace(/[^\w.\-]/g, '_');
+        const path = `${payload.category}/${Date.now()}_${safeName}`;
+
+        const { error: uploadError } = await window.supabaseClient
+          .storage.from(window.APP_CONFIG.PORTFOLIO_BUCKET)
+          .upload(path, selectedPortfolioFile, { cacheControl: '3600', upsert: false });
+
+        if (uploadError) throw uploadError;
+        if (portfolioProgress) portfolioProgress.value = 80;
+
+        const { data: publicData } = window.supabaseClient
+          .storage.from(window.APP_CONFIG.PORTFOLIO_BUCKET).getPublicUrl(path);
+
+        payload.media_url = publicData.publicUrl;
+        payload.media_type = selectedPortfolioFile.type.startsWith('video') ? 'video' : 'image';
+        if (portfolioProgress) portfolioProgress.value = 100;
+
+        const { error: insertError } = await window.supabaseClient.from('portfolio_items').insert(payload);
+        if (insertError) throw insertError;
+
+        if (portfolioStatus) {
+          portfolioStatus.textContent = '✅ تمت الإضافة بنجاح.';
+          portfolioStatus.classList.add('is-success');
+        }
+        showToast('✅ تمت إضافة العمل بنجاح!', 'success');
+
+        portfolioForm.reset();
+        setSelectedPortfolioFile(null);
+        await loadPortfolioItems();
+
+      } catch (err) {
+        if (portfolioStatus) {
+          portfolioStatus.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
+          portfolioStatus.classList.add('is-error');
+        }
+        showToast('❌ تعذّر إتمام العملية.', 'error');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        setTimeout(() => {
+          if (portfolioProgress) {
+            portfolioProgress.hidden = true;
+            portfolioProgress.value = 0;
           }
-          return;
-        }
-
-        if (!selectedPortfolioFile) {
-          if (portfolioStatus) {
-            portfolioStatus.textContent = '⚠️ الرجاء اختيار صورة أو فيديو.';
-            portfolioStatus.classList.add('is-error');
-          }
-          return;
-        }
-
-        const submitBtn = portfolioForm.querySelector('button[type="submit"]');
-        if (submitBtn) submitBtn.disabled = true;
-        if (portfolioStatus) portfolioStatus.textContent = '⏳ جارٍ الرفع...';
-        if (portfolioProgress) {
-          portfolioProgress.hidden = false;
-          portfolioProgress.value = 10;
-        }
-
-        try {
-          const safeName = selectedPortfolioFile.name.replace(/[^\w.\-]/g, '_');
-          const path = `${payload.category}/${Date.now()}_${safeName}`;
-
-          const { error: uploadError } = await window.supabaseClient
-            .storage.from(window.APP_CONFIG.PORTFOLIO_BUCKET)
-            .upload(path, selectedPortfolioFile, { cacheControl: '3600', upsert: false });
-
-          if (uploadError) throw uploadError;
-          if (portfolioProgress) portfolioProgress.value = 80;
-
-          const { data: publicData } = window.supabaseClient
-            .storage.from(window.APP_CONFIG.PORTFOLIO_BUCKET).getPublicUrl(path);
-
-          payload.media_url = publicData.publicUrl;
-          payload.media_type = selectedPortfolioFile.type.startsWith('video') ? 'video' : 'image';
-          if (portfolioProgress) portfolioProgress.value = 100;
-
-          const { error: insertError } = await window.supabaseClient.from('portfolio_items').insert(payload);
-          if (insertError) throw insertError;
-
-          if (portfolioStatus) {
-            portfolioStatus.textContent = '✅ تمت الإضافة بنجاح.';
-            portfolioStatus.classList.add('is-success');
-          }
-          showToast('✅ تمت إضافة العمل بنجاح!', 'success');
-
-          portfolioForm.reset();
-          setSelectedPortfolioFile(null);
-          await loadPortfolioItems();
-
-        } catch (err) {
-          if (portfolioStatus) {
-            portfolioStatus.textContent = '❌ خطأ: ' + (err.message || 'تعذّر إتمام العملية.');
-            portfolioStatus.classList.add('is-error');
-            showToast(portfolioStatus.textContent, 'error');
-          }
-        } finally {
-          if (submitBtn) submitBtn.disabled = false;
-          setTimeout(() => {
-            if (portfolioProgress) {
-              portfolioProgress.hidden = true;
-              portfolioProgress.value = 0;
-            }
-          }, 800);
-        }
-      });
-    }
+        }, 800);
+      }
+    });
   }
 
-  // ====== بدء التشغيل ======
+  // ====== بدء التهيئة ======
   await waitForAuth();
 });
