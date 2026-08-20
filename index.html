@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 🔒 رؤوس أمان أساسية (Content-Security-Policy عبر meta لأن الاستضافة الساكنة
+     لا تسمح بإرسال رؤوس HTTP مخصصة؛ يُفضَّل ضبطها أيضًا من إعدادات الاستضافة إن أمكن) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Anis CH — Plateforme d'Ingénierie & Solutions Logicielles Multi-Divisions</title>
 <meta name="description" content="Plateforme d'ingénierie et d'automatisation : électricité industrielle, domotique, intégration Odoo, HMI/MES et distribution de logiciels SaaS.">
 <meta name="theme-color" content="#10263B">
@@ -28,7 +32,7 @@
 
 <header class="site-header" id="top">
   <div class="container header-inner">
-    <a href="#top" class="logo">
+    <a href="#hero" class="logo">
       <span class="logo-mark" aria-hidden="true">
         <svg viewBox="0 0 40 40" width="34" height="34">
           <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -102,7 +106,7 @@
         <span class="ink-highlight" data-i18n="hero_title_2">à l'Intelligence Logicielle.</span>
       </h1>
       
-      <p class="hero-lead" data-i18n="hero_lead">
+      <p class="hero-lead" data-i18n-html="hero_lead">
         Ingénierie, automatisme et distribution SaaS en un seul écosystème. 
         <strong>Téléchargez, intégrez, industrialisez.</strong>
       </p>
@@ -249,6 +253,11 @@
       <p class="loading-state" data-i18n="loading_items">Chargement en cours...</p>
     </div>
     <p class="empty-state" id="emptyState" hidden data-i18n="empty_state">Aucun élément disponible pour le moment.</p>
+    
+    <!-- زر تحميل المزيد -->
+    <div class="load-more-container" id="loadMoreContainer" style="text-align:center; margin-top:28px; display:none;">
+      <button class="btn btn--outline" id="loadMoreBtn" data-i18n="load_more">Charger plus</button>
+    </div>
   </div>
 </section>
 
@@ -265,38 +274,38 @@
 
     <div class="services-grid">
       <article class="service-card reveal" style="border: 1px solid var(--line);">
-        <h3>Plan Gratuit (Free Pass)</h3>
-        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">0 € / Gratuit</p>
+        <h3 data-i18n="plan_free_title">Plan Gratuit (Free Pass)</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;" data-i18n="plan_free_price">0 € / Gratuit</p>
         <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
-          <li>✓ Téléchargement des logiciels et outils gratuits</li>
-          <li>✓ Consultation du portfolio et schémas basiques</li>
-          <li>✓ Support communautaire via WhatsApp</li>
-          <li style="opacity: 0.5;">✗ Pas de clé de licence pour les apps Pro</li>
+          <li data-i18n="plan_free_f1">✓ Téléchargement des logiciels et outils gratuits</li>
+          <li data-i18n="plan_free_f2">✓ Consultation du portfolio et schémas basiques</li>
+          <li data-i18n="plan_free_f3">✓ Support communautaire via WhatsApp</li>
+          <li style="opacity: 0.5;" data-i18n="plan_free_f4">✗ Pas de clé de licence pour les apps Pro</li>
         </ul>
         <button class="btn btn--outline btn--block" data-open-auth data-i18n="plan_free_btn">Commencer Gratuitement</button>
       </article>
 
       <article class="service-card reveal" style="border: 2px solid var(--copper); background: rgba(205, 127, 59, 0.04); position: relative;">
-        <div style="position: absolute; top: -1px; right: -1px; background: var(--copper); color: white; padding: 4px 16px; font-size: 0.65rem; font-weight: 700; border-radius: 0 var(--radius-md) 0 var(--radius-md); text-transform: uppercase; letter-spacing: 0.06em;">Recommandé</div>
-        <h3>Abonnement Pro (Pro Suite)</h3>
-        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">19 € <small style="font-size:0.9rem; font-weight:400;">/ mois</small></p>
+        <div style="position: absolute; top: -1px; right: -1px; background: var(--copper); color: white; padding: 4px 16px; font-size: 0.65rem; font-weight: 700; border-radius: 0 var(--radius-md) 0 var(--radius-md); text-transform: uppercase; letter-spacing: 0.06em;" data-i18n="plan_recommended">Recommandé</div>
+        <h3 data-i18n="plan_pro_title">Abonnement Pro (Pro Suite)</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;"><span data-i18n="plan_pro_price">19 €</span> <small style="font-size:0.9rem; font-weight:400;" data-i18n="plan_pro_period">/ mois</small></p>
         <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
-          <li>✓ Accès illimité à toutes les applications PC & Android</li>
-          <li>✓ Génération automatique de clés de licence (License Keys)</li>
-          <li>✓ Accès aux modules et connecteurs d'intégration Odoo</li>
-          <li>✓ Mises à jour continues et support prioritaire</li>
+          <li data-i18n="plan_pro_f1">✓ Accès illimité à toutes les applications PC & Android</li>
+          <li data-i18n="plan_pro_f2">✓ Génération automatique de clés de licence (License Keys)</li>
+          <li data-i18n="plan_pro_f3">✓ Accès aux modules et connecteurs d'intégration Odoo</li>
+          <li data-i18n="plan_pro_f4">✓ Mises à jour continues et support prioritaire</li>
         </ul>
         <button class="btn btn--primary btn--block" data-open-auth data-i18n="plan_pro_btn">S'abonner à Pro Suite</button>
       </article>
 
       <article class="service-card reveal" style="border: 1px solid var(--line);">
-        <h3>Plan Entreprise & Usines</h3>
-        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;">Sur Mesure</p>
+        <h3 data-i18n="plan_ent_title">Plan Entreprise & Usines</h3>
+        <p class="mono" style="font-size: 1.5rem; color: var(--copper); font-weight: bold; margin: 10px 0;" data-i18n="plan_ent_price">Sur Mesure</p>
         <ul style="list-style: none; padding: 0; line-height: 2.2; margin-bottom: 20px;">
-          <li>✓ Développement de connecteurs spécifiques Odoo / MES</li>
-          <li>✓ Conception d'interfaces HMI & schémas électriques dédiés</li>
-          <li>✓ Déploiement sur site & assistance 24/7</li>
-          <li>✓ Licences illimitées pour le personnel de l'entreprise</li>
+          <li data-i18n="plan_ent_f1">✓ Développement de connecteurs spécifiques Odoo / MES</li>
+          <li data-i18n="plan_ent_f2">✓ Conception d'interfaces HMI & schémas électriques dédiés</li>
+          <li data-i18n="plan_ent_f3">✓ Déploiement sur site & assistance 24/7</li>
+          <li data-i18n="plan_ent_f4">✓ Licences illimitées pour le personnel de l'entreprise</li>
         </ul>
         <a href="#contact" class="btn btn--outline btn--block" data-i18n="plan_ent_btn">Demander un Devis</a>
       </article>
@@ -371,6 +380,11 @@
 
     <div class="contact-grid">
       <form class="contact-form" id="contactForm" novalidate>
+        <!-- حقل مصيدة مضادة للبوتات (honeypot) — يبقى مخفيًا عن المستخدمين الحقيقيين -->
+        <div class="form-row" style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+          <label for="website">Website</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
         <div class="form-row">
           <label for="name" data-i18n="form_name">Nom complet</label>
           <input type="text" id="name" name="name" required placeholder="Votre nom complet">
@@ -399,6 +413,24 @@
         <button type="submit" class="btn btn--primary btn--block" data-i18n="form_submit">Envoyer la demande</button>
         <p class="form-note" id="formNote" role="status"></p>
       </form>
+
+      <script>
+        // ملء نموذج التواصل تلقائيًا عند القدوم من زر "الاشتراك Pro" أو غيره،
+        // ثم الانتقال إليه مباشرة (بدلاً من نافذة تسجيل الدخول فقط لمن هو مسجَّل بالفعل)
+        document.addEventListener('DOMContentLoaded', () => {
+          const proBtn = document.querySelector('[data-i18n="plan_pro_btn"]');
+          if (proBtn) {
+            proBtn.addEventListener('click', (e) => {
+              if (window.Auth && window.Auth.isLoggedIn()) {
+                e.preventDefault();
+                const svc = document.getElementById('serviceType');
+                if (svc) svc.value = 'subscription';
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            });
+          }
+        });
+      </script>
 
       <aside class="contact-side">
         <a href="#" id="whatsappLink" class="contact-link contact-link--whatsapp" target="_blank" rel="noopener">
@@ -454,6 +486,9 @@
 
 <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">↑</button>
 
+<!-- ========================================================= -->
+<!--   MODAL AUTH (Connexion / Inscription avec OAuth)         -->
+<!-- ========================================================= -->
 <div class="modal" id="authModal" hidden>
   <div class="modal-backdrop" id="authModalBackdrop"></div>
   <div class="modal-box" role="dialog" aria-modal="true">
@@ -466,22 +501,45 @@
       <li>✓ Suivi des abonnements et support technique</li>
     </ul>
 
+    <!-- Formulaire classique -->
     <form id="authForm" novalidate>
+      <div class="form-row" id="authNameRow" hidden>
+        <label for="authFullName" data-i18n="auth_fullname">Nom complet</label>
+        <input type="text" id="authFullName" name="fullName" autocomplete="name" maxlength="100" placeholder="Votre nom">
+      </div>
       <div class="form-row">
         <label for="authEmail" data-i18n="auth_email">Adresse E-mail</label>
-        <input type="email" id="authEmail" name="email" required autocomplete="email" placeholder="vous@exemple.com">
+        <input type="email" id="authEmail" name="email" required autocomplete="email" maxlength="255" placeholder="vous@exemple.com">
       </div>
       <div class="form-row">
         <label for="authPassword" data-i18n="auth_password">Mot de passe</label>
-        <input type="password" id="authPassword" name="password" required minlength="6" autocomplete="current-password" placeholder="••••••••">
+        <input type="password" id="authPassword" name="password" required minlength="8" maxlength="128" autocomplete="current-password" placeholder="••••••••">
+        <small class="auth-hint" id="authPasswordHint" data-i18n="auth_password_hint" hidden>8 caractères min., avec au moins une lettre et un chiffre.</small>
       </div>
       <div class="form-row" id="authConfirmRow" hidden>
         <label for="authConfirmPassword" data-i18n="auth_confirm">Confirmer le mot de passe</label>
-        <input type="password" id="authConfirmPassword" name="confirmPassword" minlength="6" autocomplete="new-password" placeholder="••••••••">
+        <input type="password" id="authConfirmPassword" name="confirmPassword" minlength="8" maxlength="128" autocomplete="new-password" placeholder="••••••••">
       </div>
-      <p class="auth-error" id="authError"></p>
+      <p class="auth-error" id="authError" role="alert"></p>
+      <p class="auth-success" id="authSuccess" role="status"></p>
       <button type="submit" class="btn btn--primary btn--block" id="authSubmitBtn" data-i18n="auth_login_btn">Se connecter</button>
+      <button type="button" class="auth-forgot-link" id="authForgotBtn" data-i18n="auth_forgot">Mot de passe oublié ?</button>
     </form>
+
+    <!-- OAuth (Google, GitHub) -->
+    <div class="auth-oauth" style="margin-top:16px;">
+      <p style="font-size:0.85rem; color:var(--ink-faint); margin:0 0 10px; text-align:center;">ou continuer avec</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button type="button" class="btn btn--outline" data-oauth="google" style="flex:1; justify-content:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button type="button" class="btn btn--outline" data-oauth="github" style="flex:1; justify-content:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.71c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.34 1.12 2.91.86.09-.66.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.46.1 2.72.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+          GitHub
+        </button>
+      </div>
+    </div>
 
     <div class="auth-switch-row">
       <button type="button" id="authSwitchBtn" data-i18n="auth_switch_signup">Pas encore de compte ? S'inscrire</button>
@@ -491,44 +549,109 @@
   </div>
 </div>
 
-<script src="js/config.js"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/main.js"></script>
-<script src="js/effects.js"></script>
-<script>
-  /* =========================================================
-     FIX : Ajustement dynamique de la hauteur du header sticky
-     ========================================================= */
-  (function () {
-    const header = document.querySelector('.site-header');
-    if (!header) return;
+<!-- ========================================================= -->
+<!--   MODAL RESET PASSWORD (lien reçu par e-mail)              -->
+<!-- ========================================================= -->
+<div class="modal" id="resetPasswordModal" hidden>
+  <div class="modal-backdrop" id="resetPasswordBackdrop"></div>
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" id="resetPasswordClose" aria-label="Fermer">×</button>
+    <h3 data-i18n="auth_reset_title">Choisir un nouveau mot de passe</h3>
+    <form id="resetPasswordForm" novalidate>
+      <div class="form-row">
+        <label for="newPassword" data-i18n="auth_new_password">Nouveau mot de passe</label>
+        <input type="password" id="newPassword" name="newPassword" required minlength="8" maxlength="128" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <div class="form-row">
+        <label for="newPasswordConfirm" data-i18n="auth_confirm">Confirmer le mot de passe</label>
+        <input type="password" id="newPasswordConfirm" name="newPasswordConfirm" required minlength="8" maxlength="128" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <p class="auth-error" id="resetPasswordError" role="alert"></p>
+      <button type="submit" class="btn btn--primary btn--block" data-i18n="auth_reset_submit">Mettre à jour le mot de passe</button>
+    </form>
+  </div>
+</div>
 
-    function syncHeaderOffset() {
-      const h = header.offsetHeight + 12;
-      document.documentElement.style.scrollPaddingTop = h + 'px';
-      document.querySelectorAll('main section[id], .hero[id]').forEach(sec => {
-        sec.style.scrollMarginTop = h + 'px';
+<!-- ========================================================= -->
+<!--   SCRIPTS (Structure modulaire avec type="module")        -->
+<!-- ========================================================= -->
+<script type="module" src="js/config.js"></script>
+<script type="module" src="js/supabase-client.js"></script>
+<script type="module" src="js/i18n.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/utils/helpers.js"></script>
+<script type="module" src="js/modules/tab-navigation.js"></script>
+<script type="module" src="js/modules/contact-form.js"></script>
+<script type="module" src="js/modules/portfolio-gallery.js"></script>
+<script type="module" src="js/modules/software-catalog.js"></script>
+<script type="module" src="js/main.js"></script>
+<script type="module" src="js/effects.js"></script>
+
+<!-- ========================================================= -->
+<!--   SCRIPT DE CONFIGURATION (liens, header sticky, etc.)    -->
+<!-- ========================================================= -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // === Mise à jour dynamique de la hauteur du header ===
+    const header = document.querySelector('.site-header');
+    if (header) {
+      const updateHeaderHeight = () => {
+        const height = header.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', height + 'px');
+      };
+      updateHeaderHeight();
+      window.addEventListener('resize', updateHeaderHeight);
+      // Recalcul après le chargement des polices
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(updateHeaderHeight);
+      }
+    }
+
+    // === Liens sociaux ===
+    const whatsappLink = document.getElementById('whatsappLink');
+    const githubLink = document.getElementById('githubLink');
+    const linkedinLink = document.getElementById('linkedinLink');
+    
+    if (whatsappLink && window.APP_CONFIG) {
+      whatsappLink.href = `https://wa.me/${window.APP_CONFIG.WHATSAPP_NUMBER || '21600000000'}`;
+    }
+    if (githubLink && window.APP_CONFIG) {
+      githubLink.href = window.APP_CONFIG.GITHUB_URL || '#';
+    }
+    if (linkedinLink && window.APP_CONFIG) {
+      linkedinLink.href = window.APP_CONFIG.LINKEDIN_URL || '#';
+    }
+
+    // === Fermeture de la modale par le bouton invité ===
+    const authGuestBtn = document.getElementById('authGuestBtn');
+    const authModalClose = document.getElementById('authModalClose');
+    if (authGuestBtn && authModalClose) {
+      authGuestBtn.addEventListener('click', () => authModalClose.click());
+    }
+
+    // === Année dans le footer ===
+    const footerYear = document.getElementById('footerYear');
+    if (footerYear) {
+      footerYear.textContent = new Date().getFullYear();
+    }
+    const footerDate = document.getElementById('footerDate');
+    if (footerDate) {
+      footerDate.textContent = new Date().toISOString().slice(0, 7);
+    }
+
+    // === Ajustement du header sticky ===
+    const navToggle = document.getElementById('navToggle');
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        setTimeout(() => {
+          if (header) {
+            document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+          }
+        }, 50);
       });
     }
-
-    syncHeaderOffset();
-    window.addEventListener('resize', syncHeaderOffset);
-    window.addEventListener('load', syncHeaderOffset);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(syncHeaderOffset);
-    }
-    const navToggle = document.getElementById('navToggle');
-    if (navToggle) navToggle.addEventListener('click', () => setTimeout(syncHeaderOffset, 50));
-  })();
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('whatsappLink').href = `https://wa.me/${window.APP_CONFIG.WHATSAPP_NUMBER}`;
-    document.getElementById('githubLink').href = window.APP_CONFIG.GITHUB_URL;
-    document.getElementById('linkedinLink').href = window.APP_CONFIG.LINKEDIN_URL;
-    document.getElementById('authGuestBtn').addEventListener('click', () => document.getElementById('authModalClose').click());
   });
 </script>
+
 </body>
 </html>

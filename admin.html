@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>لوحة التحكم — م. أنيس</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -87,6 +89,7 @@
               <option value="desktop">برنامج حاسوب</option>
               <option value="saas">منصة أونلاين</option>
               <option value="game">لعبة</option>
+              <option value="industrial">صناعي / CNC</option>
             </select>
           </div>
           <div class="form-row">
@@ -98,6 +101,15 @@
         <div class="form-grid-2">
           <div class="form-row"><label>رقم الإصدار</label><input type="text" name="version" placeholder="1.0.0"></div>
           <div class="form-row"><label>معلومة إضافية</label><input type="text" name="metaText" placeholder="18 MB أو Windows 10/11"></div>
+        </div>
+
+        <div class="form-row">
+          <label>مستوى الاشتراك المطلوب للتحميل *</label>
+          <select name="requiredPlan" required>
+            <option value="free">مجاني — متاح للجميع بعد تسجيل الدخول</option>
+            <option value="pro">Pro — للمشتركين فقط</option>
+            <option value="enterprise">Enterprise — حسب الطلب فقط</option>
+          </select>
         </div>
 
         <div class="form-row">
@@ -159,6 +171,7 @@
             <option value="domotique">دوموتيك</option>
             <option value="app">تطبيق</option>
             <option value="web">موقع ويب</option>
+            <option value="cnc">CNC / صناعي</option>
             <option value="other">أخرى</option>
           </select>
         </div>
@@ -175,6 +188,34 @@
       <table class="admin-table">
         <thead><tr><th>العنوان</th><th>التصنيف</th><th>النوع</th><th></th></tr></thead>
         <tbody id="portfolioItemsBody"><tr><td colspan="4">جارٍ التحميل...</td></tr></tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <div class="admin-grid" style="margin-top:32px">
+
+    <!-- ---------- رسائل التواصل الواردة ---------- -->
+    <section class="admin-card">
+      <h2>✉️ رسائل التواصل الواردة <span id="unreadBadge" class="soft-plan-lock" hidden></span></h2>
+      <table class="admin-table">
+        <thead><tr><th>الاسم</th><th>معلومة التواصل</th><th>الخدمة</th><th>التفاصيل</th><th>التاريخ</th><th></th></tr></thead>
+        <tbody id="contactMessagesBody"><tr><td colspan="6">جارٍ التحميل...</td></tr></tbody>
+      </table>
+    </section>
+
+    <!-- ---------- إدارة المستخدمين والاشتراكات ---------- -->
+    <section class="admin-card">
+      <h2>👤 إدارة المستخدمين والاشتراكات</h2>
+      <p style="font-size:.82rem;color:var(--ink-faint);margin:0 0 12px">
+        ابحث عن مستخدم بالبريد الإلكتروني لتغيير خطته (مجاني/Pro/Enterprise) بعد التأكد من الدفع يدويًا (واتساب/تحويل بنكي).
+      </p>
+      <div class="form-row">
+        <input type="email" id="userSearchInput" placeholder="ابحث ببريد المستخدم...">
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>البريد</th><th>الاسم</th><th>الخطة</th><th>مسجَّل منذ</th><th></th></tr></thead>
+        <tbody id="usersBody"><tr><td colspan="5">اكتب بريدًا للبحث</td></tr></tbody>
       </table>
     </section>
 

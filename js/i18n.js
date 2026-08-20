@@ -39,6 +39,12 @@ const TRANSLATIONS = {
     auth_perk_2: "Obtention des clés de licences (Abonnés Pro)",
     auth_perk_3: "Suivi des abonnements et support technique",
     auth_or_browse: "ou",
+    auth_fullname: "Nom complet",
+    auth_password_hint: "8 caractères min., avec au moins une lettre et un chiffre.",
+    auth_forgot: "Mot de passe oublié ?",
+    auth_reset_title: "Choisir un nouveau mot de passe",
+    auth_new_password: "Nouveau mot de passe",
+    auth_reset_submit: "Mettre à jour le mot de passe",
 
     // Hero
     hero_eyebrow: "Disponible pour projets & intégrations SaaS",
@@ -175,6 +181,12 @@ const TRANSLATIONS = {
     auth_perk_2: "الحصول على مفاتيح الترخيص (للمشتركين Pro)",
     auth_perk_3: "متابعة الاشتراكات والدعم الفني",
     auth_or_browse: "أو",
+    auth_fullname: "الاسم الكامل",
+    auth_password_hint: "8 خانات على الأقل، مع حرف ورقم واحد على الأقل.",
+    auth_forgot: "نسيت كلمة المرور؟",
+    auth_reset_title: "اختر كلمة مرور جديدة",
+    auth_new_password: "كلمة المرور الجديدة",
+    auth_reset_submit: "تحديث كلمة المرور",
 
     // Hero
     hero_eyebrow: "متاح للمشاريع والتكاملات SaaS",
@@ -311,6 +323,12 @@ const TRANSLATIONS = {
     auth_perk_2: "Get license keys (Pro Subscribers)",
     auth_perk_3: "Subscription tracking and technical support",
     auth_or_browse: "or",
+    auth_fullname: "Full name",
+    auth_password_hint: "8+ characters, with at least one letter and one number.",
+    auth_forgot: "Forgot password?",
+    auth_reset_title: "Choose a new password",
+    auth_new_password: "New password",
+    auth_reset_submit: "Update password",
 
     // Hero
     hero_eyebrow: "Available for projects & SaaS integrations",
