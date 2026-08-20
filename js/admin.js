@@ -166,8 +166,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       return false;
     }
 
-    // تم التعديل هنا: قراءة window.Auth.isAdmin كخاصية مباشرة بدلاً من دالة
-    const isAdminUser = typeof window.Auth.isAdmin === 'function' ? await window.Auth.isAdmin() : window.Auth.isAdmin;
+    // إصلاح الخطأ: فحص ما إذا كان isAdmin دالة أم خاصية
+    const isAdminUser = typeof window.Auth.isAdmin === 'function' 
+      ? await window.Auth.isAdmin() 
+      : window.Auth.isAdmin;
 
     if (!isAdminUser) {
       setGuardState('denied', `⛔ حسابك (${window.Auth.user?.email || ''}) مسجّل لكنه لا يملك صلاحية المشرف.`);
